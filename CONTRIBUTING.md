@@ -2,6 +2,8 @@
 
 Thank you for your interest in contributing. External contributions are welcome.
 
+Track work in Linear: [SV Governance dApp Implementation](https://linear.app/avro-digital/project/sv-governance-dapp-implementation-46f8d4022e3b). See [`docs/sdlc.md`](./docs/sdlc.md) for the full branching and review workflow.
+
 ## Development environment
 
 1. Install **Node 20+** (see `.nvmrc`).
@@ -40,6 +42,13 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 Example: `feat(votes): add proposal detail header from Splice extraction`
 
 ## Pull requests
+
+**`main` is protected** — all changes land via PR with passing CI and at least one approval.
+
+1. Create or pick a Linear issue (e.g. `AVR-2475`).
+2. Branch using Linear's git branch name: `eric/avr-2475-short-description`.
+3. Open PR to `main` with `Closes AVR-XXXX` in the body.
+4. Ensure CI passes; request review.
 
 - Keep PRs focused and reviewable; prefer smaller extractions over large monolithic imports.
 - Link the relevant [grant milestone issue](https://github.com/canton-foundation/canton-dev-fund/issues/287) when the work maps to funded deliverables.
