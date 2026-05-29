@@ -2,14 +2,14 @@
 
 import { useQuery } from '@tanstack/react-query';
 
+import { MOCK_PROPOSAL_LISTINGS } from '@/lib/mock-proposals';
 import type { ProposalListingItem } from '@/types/governance';
 
-/** Mock data until Splice `ProposalListingSection` extraction + ledger wiring. */
-const MOCK_PROPOSALS: readonly ProposalListingItem[] = [];
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_VOTES !== 'false';
 
 async function fetchVoteListings(): Promise<readonly ProposalListingItem[]> {
   await Promise.resolve();
-  return MOCK_PROPOSALS;
+  return USE_MOCK_DATA ? MOCK_PROPOSAL_LISTINGS : [];
 }
 
 /**
@@ -18,7 +18,7 @@ async function fetchVoteListings(): Promise<readonly ProposalListingItem[]> {
  */
 export function useVotes() {
   return useQuery({
-    queryKey: ['listDsoRulesVoteRequests'],
+    queryKey: ['listDsoRulesVoteRequests', USE_MOCK_DATA],
     queryFn: fetchVoteListings,
   });
 }

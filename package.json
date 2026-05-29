@@ -21,7 +21,8 @@
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "format": "prettier --check .",
-    "format:write": "prettier --write ."
+    "format:write": "prettier --write .",
+    "setup:hooks": "bash scripts/setup-git-hooks.sh"
   },
   "dependencies": {
     "@canton-network/dapp-sdk": "^1.2.0",
@@ -30,8 +31,10 @@
     "@mui/icons-material": "^5.16.14",
     "@mui/material": "^5.16.14",
     "@tanstack/react-query": "^5.66.0",
+    "dayjs": "^1.11.13",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-intersection-observer": "^9.15.1",
     "react-router-dom": "^6.29.0",
     "zustand": "^5.0.3"
   },

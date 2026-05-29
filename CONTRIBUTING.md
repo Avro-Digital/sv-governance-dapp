@@ -10,6 +10,7 @@ Thank you for your interest in contributing. External contributions are welcome.
 
    ```bash
    pnpm install
+   pnpm setup:hooks   # installs Signed-off-by prepare-commit-msg hook
    cp .env.example .env
    pnpm dev
    ```

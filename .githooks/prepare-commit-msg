@@ -1,0 +1,8 @@
+#!/bin/bash
+# Append the Signed-off-by trailer with a blank line separator
+SOB="Signed-off-by: Eric Mann <eric@avrofi.com>"
+# Only add if not already present (e.g. amend/rebase)
+grep -q "^${SOB}$" "$1" && exit 0
+# Ensure a blank line before the trailer
+echo "" >> "$1"
+echo "$SOB" >> "$1"
