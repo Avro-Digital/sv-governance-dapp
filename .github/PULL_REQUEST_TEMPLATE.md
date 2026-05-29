@@ -2,6 +2,13 @@
 
 <!-- Brief description of changes -->
 
+## Linear
+
+<!-- Required: Closes AVR-XXXX or Related to AVR-XXXX -->
+<!-- https://linear.app/avro-digital/project/sv-governance-dapp-implementation-46f8d4022e3b -->
+
+Closes AVR-
+
 ## Grant milestone
 
 <!-- Link to canton-dev-fund issue if applicable, e.g. https://github.com/canton-foundation/canton-dev-fund/issues/287 -->

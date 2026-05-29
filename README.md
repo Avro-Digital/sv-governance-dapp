@@ -12,6 +12,8 @@ Standalone application for Canton Super Validators to cast governance votes via 
 
 **Work in progress** — funded by the [Canton Foundation Development Fund](https://github.com/canton-foundation/canton-dev-fund) under [grant proposal #223](https://github.com/canton-foundation/canton-dev-fund/pull/223). Current focus: [Milestone 2 — External Signing Proof of Concept](https://github.com/canton-foundation/canton-dev-fund/issues/287).
 
+Project tracking: [Linear — SV Governance dApp Implementation](https://linear.app/avro-digital/project/sv-governance-dapp-implementation-46f8d4022e3b) · M2 epic: [AVR-2471](https://linear.app/avro-digital/issue/AVR-2471)
+
 ## About
 
 This dApp lets Super Validators (SVs) review pending governance proposals and cast votes without relying on the full SV operator application. It is designed for wallet-gateway-backed external signing, enabling SV operators to approve governance actions through their preferred Canton wallet rather than in-app credentials alone.
@@ -45,6 +47,8 @@ pnpm typecheck  # TypeScript strict check
 ```
 
 Copy `.env.example` to `.env` and set ledger connection values before connecting to a participant.
+
+Contributing: [`CONTRIBUTING.md`](./CONTRIBUTING.md) · SDLC: [`docs/sdlc.md`](./docs/sdlc.md) (PR-only `main`, Linear-linked branches)
 
 ## Roadmap
 
