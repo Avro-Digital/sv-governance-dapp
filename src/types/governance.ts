@@ -13,8 +13,11 @@ export type ProposalListingStatus =
   | 'Expired'
   | 'Unknown';
 
-/** Matches Splice `YourVoteStatus`. */
+/** Matches Splice `YourVoteStatus` / vote tab filter. */
 export type YourVoteStatus = 'accepted' | 'rejected' | 'no-vote';
+
+/** Tab filter for the votes list on the detail page. */
+export type VoteTabFilter = YourVoteStatus | 'all';
 
 /** Matches Splice `VoteReason`. */
 export interface VoteReason {
@@ -51,6 +54,83 @@ export interface ProposalListingItem {
   readonly status: ProposalListingStatus;
   readonly voteStats: Record<YourVoteStatus, number>;
   readonly acceptanceThreshold: bigint;
+}
+
+/** Matches Splice `ProposalVotingInformation`. */
+export interface ProposalVotingInformation {
+  readonly requester: string;
+  readonly requesterIsYou?: boolean;
+  readonly votingThresholdDeadline: string;
+  readonly voteTakesEffect: string;
+  readonly status: ProposalListingStatus;
+}
+
+/** Matches Splice `ConfigChange`. */
+export interface ConfigChange {
+  readonly fieldName: string;
+  readonly label: string;
+  readonly currentValue: string;
+  readonly newValue: string;
+  readonly isId?: boolean;
+}
+
+export type SupportedActionTag =
+  | 'SRARC_UpdateSvRewardWeight'
+  | 'SRARC_GrantFeaturedAppRight'
+  | 'SRARC_OffboardSv'
+  | 'SRARC_RevokeFeaturedAppRight'
+  | 'SRARC_CreateUnallocatedUnclaimedActivityRecord'
+  | 'SRARC_SetConfig'
+  | 'CRARC_SetConfig';
+
+export interface UpdateSvRewardWeightProposal {
+  readonly svToUpdate: string;
+  readonly currentWeight: string;
+  readonly weightChange: string;
+}
+
+export interface FeatureAppProposal {
+  readonly provider: string;
+}
+
+/** Proposal fields for the detail view (simplified from Splice `ProposalDetails`). */
+export type ProposalDetailsView = {
+  readonly actionName: string;
+  readonly summary: string;
+  readonly url: string;
+  readonly isVoteRequest?: boolean;
+} & (
+  | {
+      readonly action: 'SRARC_UpdateSvRewardWeight';
+      readonly proposal: UpdateSvRewardWeightProposal;
+    }
+  | {
+      readonly action: 'SRARC_GrantFeaturedAppRight';
+      readonly proposal: FeatureAppProposal;
+    }
+  | {
+      readonly action: 'SRARC_OffboardSv' | 'SRARC_RevokeFeaturedAppRight' | 'SRARC_SetConfig' | 'CRARC_SetConfig' | 'SRARC_CreateUnallocatedUnclaimedActivityRecord';
+      readonly proposal?: undefined;
+    }
+);
+
+/** Full detail payload for `ProposalDetailsContent`. */
+export interface ProposalDetailView {
+  readonly contractId: string;
+  readonly proposalDetails: ProposalDetailsView;
+  readonly votingInformation: ProposalVotingInformation;
+  readonly votes: readonly ProposalVote[];
+}
+
+/** Matches Splice `ActionRequiredData`. */
+export interface ActionRequiredItem {
+  readonly contractId: string;
+  readonly actionName: string;
+  readonly description: string;
+  readonly votingCloses: string;
+  readonly createdAt: string;
+  readonly requester: string;
+  readonly isYou?: boolean;
 }
 
 /** Arguments for casting a vote — mirrors Splice `ProposalVoteForm` / `SvAdminClient.castVote`. */

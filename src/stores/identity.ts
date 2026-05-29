@@ -2,6 +2,8 @@
 
 import { create } from 'zustand';
 
+import { MOCK_SV_PARTY } from '@/lib/mock-proposals';
+
 export interface SvIdentity {
   readonly partyId: string;
   readonly displayName: string;
@@ -15,7 +17,7 @@ interface IdentityState {
 
 /** Mock SV identity until real auth is integrated (Milestone 2+). */
 const MOCK_IDENTITY: SvIdentity = {
-  partyId: 'mock-sv-party::1220abcd',
+  partyId: MOCK_SV_PARTY,
   displayName: 'Mock Super Validator',
   svName: 'mock-sv-1',
 };

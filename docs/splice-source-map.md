@@ -8,9 +8,10 @@ Governance UI lives in `apps/sv/frontend/`. Route: `/governance` (`src/routes/go
 
 | Priority | This repo | Splice path | Notes |
 | --- | --- | --- | --- |
-| 1 | `src/routes/VoteList.tsx`, `src/hooks/useVotes.ts` | `components/governance/ProposalListingSection.tsx`, `hooks/useListVoteRequests.tsx` | Listing table + sort; data from `useListDsoRulesVoteRequests` |
-| 2 | `src/routes/VoteDetail.tsx` | `components/governance/ProposalDetailsContent.tsx`, `routes/voteRequestDetails.tsx` | Detail layout, `ProposalSummary`, `ActionRequiredSection` |
-| 3 | Cast vote form (TBD component) | `components/governance/ProposalVoteForm.tsx` | Replace `castVote` mutation with `useCastVote` / `ExternalSigner` |
+| 1 | `src/routes/VoteList.tsx`, `src/hooks/useVotes.ts` | `components/governance/ProposalListingSection.tsx`, `hooks/useListVoteRequests.tsx` | Done — mock listings |
+| 2 | `src/routes/VoteDetail.tsx` | `components/governance/ProposalDetailsContent.tsx`, `routes/voteRequestDetails.tsx` | Done — mock detail by contractId |
+| 3 | `src/components/governance/ProposalVoteForm.tsx` | `components/governance/ProposalVoteForm.tsx` | Done — shell wired to `useCastVote` |
+| 4 | `src/routes/VoteList.tsx` | `components/governance/ActionRequiredSection.tsx` | Done — items with `yourVote: no-vote` |
 | — | `src/types/governance.ts` | `utils/types.ts` | `ProposalListingData`, `ProposalVote`, `CastVoteArgs` shapes |
 | — | `src/lib/sv-admin.ts` | `contexts/SvAdminServiceContext.tsx` | Reference only — not used at runtime |
 | — | Governance helpers | `utils/governance.ts` | `actionTagToTitle`, `computeVoteStats`, `computeYourVote` |
