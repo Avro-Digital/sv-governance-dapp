@@ -15,8 +15,8 @@
 
 ## Test plan
 
-- [ ] `pnpm lint`
+- [ ] `pnpm lint` ([Lint workflow](https://github.com/Avro-Digital/sv-governance-dapp/actions/workflows/lint.yml))
 - [ ] `pnpm typecheck`
-- [ ] `pnpm test`
+- [ ] `pnpm test` ([Test workflow](https://github.com/Avro-Digital/sv-governance-dapp/actions/workflows/test.yml))
 - [ ] `pnpm build`
 - [ ] Manual verification (describe):

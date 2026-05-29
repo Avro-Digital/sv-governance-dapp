@@ -1,5 +1,11 @@
 # SV Governance dApp
 
+[![Lint](https://github.com/Avro-Digital/sv-governance-dapp/actions/workflows/lint.yml/badge.svg)](https://github.com/Avro-Digital/sv-governance-dapp/actions/workflows/lint.yml)
+[![Tests](https://github.com/Avro-Digital/sv-governance-dapp/actions/workflows/test.yml/badge.svg)](https://github.com/Avro-Digital/sv-governance-dapp/actions/workflows/test.yml)
+[![Release](https://img.shields.io/github/v/release/Avro-Digital/sv-governance-dapp?label=release)](https://github.com/Avro-Digital/sv-governance-dapp/releases)
+[![License](https://img.shields.io/github/license/Avro-Digital/sv-governance-dapp)](./LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white)](#development)
+
 Standalone application for Canton Super Validators to cast governance votes via externally-signed wallet flows.
 
 ## Status

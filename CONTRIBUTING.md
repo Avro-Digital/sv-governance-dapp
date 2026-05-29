@@ -24,6 +24,8 @@ Thank you for your interest in contributing. External contributions are welcome.
    pnpm build
    ```
 
+   CI runs the same checks via GitHub Actions ([Lint](https://github.com/Avro-Digital/sv-governance-dapp/actions/workflows/lint.yml), [Test](https://github.com/Avro-Digital/sv-governance-dapp/actions/workflows/test.yml)).
+
 ## Commit messages
 
 Use [Conventional Commits](https://www.conventionalcommits.org/):
