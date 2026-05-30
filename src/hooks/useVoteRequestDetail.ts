@@ -3,54 +3,57 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { useGovernanceSnapshot } from '@/hooks/useGovernanceSnapshot';
-import { toProposalDetailView } from '@/lib/governance-transform';
-import { getMockProposalDetail } from '@/lib/mock-proposals';
-import { resolveVoteRequest } from '@/lib/scan-client';
+import { fetchMockGovernanceSnapshot } from '@/lib/mock-governance-snapshot';
+import { findVoteRequestInSnapshot, resolveVoteRequest } from '@/lib/scan-client';
 import type { ScanDsoInfoResponse, ScanVoteRequestContract } from '@/lib/scan-types';
-import { useIdentityStore } from '@/stores/identity';
-import type { ProposalDetailView } from '@/types/governance';
 
 const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_VOTES !== 'false';
 
-async function fetchMockProposalDetail(contractId: string): Promise<ProposalDetailView | null> {
-  await Promise.resolve();
-  return getMockProposalDetail(contractId) ?? null;
+export interface VoteRequestDetail {
+  readonly contract: ScanVoteRequestContract;
+  readonly dsoInfo: ScanDsoInfoResponse;
 }
 
-async function fetchLiveProposalDetail(
+async function fetchMockVoteRequestDetail(routeId: string): Promise<VoteRequestDetail | null> {
+  const snapshot = await fetchMockGovernanceSnapshot();
+  const contract = findVoteRequestInSnapshot(routeId, snapshot.voteRequests);
+  if (contract === undefined) {
+    return null;
+  }
+  return { contract, dsoInfo: snapshot.dsoInfo };
+}
+
+async function fetchLiveVoteRequestDetail(
   routeId: string,
   dsoInfo: ScanDsoInfoResponse,
-  svPartyId: string,
   knownRequests: readonly ScanVoteRequestContract[],
-): Promise<ProposalDetailView | null> {
+): Promise<VoteRequestDetail | null> {
   const contract = await resolveVoteRequest(routeId, knownRequests);
   if (contract === null) {
     return null;
   }
-  return toProposalDetailView(contract, dsoInfo, svPartyId);
+  return { contract, dsoInfo };
 }
 
-export function useProposalDetail(contractId: string) {
+export function useVoteRequestDetail(contractId: string) {
   const decodedId = decodeURIComponent(contractId);
-  const partyId = useIdentityStore((state) => state.identity.partyId);
   const snapshotQuery = useGovernanceSnapshot();
 
   const mockQuery = useQuery({
-    queryKey: ['proposalDetail', decodedId, USE_MOCK_DATA],
-    queryFn: () => fetchMockProposalDetail(decodedId),
+    queryKey: ['voteRequestDetail', decodedId, USE_MOCK_DATA],
+    queryFn: () => fetchMockVoteRequestDetail(decodedId),
     enabled: USE_MOCK_DATA && decodedId.length > 0,
   });
 
   const liveQuery = useQuery({
-    queryKey: ['proposalDetail', decodedId, partyId, snapshotQuery.dataUpdatedAt],
+    queryKey: ['voteRequestDetail', decodedId, snapshotQuery.dataUpdatedAt],
     queryFn: () => {
       if (snapshotQuery.data === undefined) {
         throw new Error('Governance snapshot not loaded');
       }
-      return fetchLiveProposalDetail(
+      return fetchLiveVoteRequestDetail(
         decodedId,
         snapshotQuery.data.dsoInfo,
-        partyId,
         snapshotQuery.data.voteRequests,
       );
     },

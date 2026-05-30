@@ -47,7 +47,7 @@ export function App() {
               </Link>
             </Toolbar>
           </AppBar>
-          <Container maxWidth="md" sx={{ py: 4 }}>
+          <Container maxWidth="lg" sx={{ py: 4 }}>
             <Box component="main">
               <Routes>
                 <Route path="/" element={<Navigate to="/votes" replace />} />

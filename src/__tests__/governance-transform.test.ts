@@ -7,6 +7,7 @@ import {
   computeYourVote,
   getActionName,
   getVoteRequestContractId,
+  getVoteResultStatus,
   parseVoteEntries,
   splitVoteRequestsForSv,
   toProposalDetailView,
@@ -114,5 +115,16 @@ describe('governance-transform', () => {
     if (detail.proposalDetails.action === 'unsupported') {
       expect(detail.proposalDetails.rawActionTag).toBe('CRARC_AddFutureAmuletConfigSchedule');
     }
+  });
+
+  it('maps vote result outcomes to listing status', () => {
+    expect(getVoteResultStatus({ tag: 'VRO_Rejected' })).toBe('Rejected');
+    expect(getVoteResultStatus({ tag: 'VRO_Expired' })).toBe('Expired');
+    expect(
+      getVoteResultStatus({
+        tag: 'VRO_Accepted',
+        value: { effectiveAt: '2020-01-01T00:00:00Z' },
+      }),
+    ).toBe('Implemented');
   });
 });
