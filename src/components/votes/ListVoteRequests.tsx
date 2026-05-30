@@ -19,11 +19,15 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 
+import { ProposalListingSection } from '@/components/governance/ProposalListingSection';
 import { useGovernanceVoteRequests } from '@/hooks/useGovernanceVoteRequests';
+import { useVoteHistoryListing } from '@/hooks/useVoteRequestResults';
 
-import type { VoteRequestModalState } from './types';
+import type { VoteRequestModalState, VoteResultModalState } from './types';
 import { VoteRequestDetailPanel } from './VoteRequestDetailPanel';
 import { VoteRequestsFilterTable } from './VoteRequestsFilterTable';
+import { VoteResultModalView } from './VoteResultModalView';
+import { VoteResultsFilterTable } from './VoteResultsFilterTable';
 
 function tabProps(id: string) {
   return {
@@ -50,10 +54,12 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 }
 
 export function ListVoteRequests() {
-  const { isLoading, isError, error, dsoInfo, voteRequests, actionNeeded, inProgress } =
+  const { isLoading, isError, error, dsoInfo, voteRequests, actionNeeded, inProgress, svPartyId } =
     useGovernanceVoteRequests();
+  const voteHistoryQuery = useVoteHistoryListing(dsoInfo, svPartyId);
   const [tabIndex, setTabIndex] = useState(0);
   const [modalState, setModalState] = useState<VoteRequestModalState>({ open: false });
+  const [resultModalState, setResultModalState] = useState<VoteResultModalState>({ open: false });
 
   const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
     setTabIndex(newValue);
@@ -63,8 +69,13 @@ export function ListVoteRequests() {
     setModalState(state);
   };
 
+  const openModalWithVoteResult = (state: VoteResultModalState) => {
+    setResultModalState(state);
+  };
+
   const handleClose = () => {
     setModalState({ open: false });
+    setResultModalState({ open: false });
   };
 
   if (isLoading) {
@@ -88,7 +99,7 @@ export function ListVoteRequests() {
   }
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={4}>
       <Typography variant="h4" component="h1">
         Vote Requests
       </Typography>
@@ -98,14 +109,12 @@ export function ListVoteRequests() {
           <Tab
             label="Action Needed"
             {...tabProps('action-needed')}
-            icon={
-              <Badge badgeContent={actionNeeded.length} color="error" sx={{ mx: 1 }} />
-            }
+            icon={<Badge badgeContent={actionNeeded.length} color="error" sx={{ mx: 1 }} />}
             iconPosition="end"
           />
           <Tab label="In Progress" {...tabProps('in-progress')} data-testid="tab-panel-in-progress" />
-          <Tab label="Executed" {...tabProps('executed')} disabled />
-          <Tab label="Rejected" {...tabProps('rejected')} disabled />
+          <Tab label="Executed" {...tabProps('executed')} />
+          <Tab label="Rejected" {...tabProps('rejected')} />
         </Tabs>
       </Box>
 
@@ -126,12 +135,34 @@ export function ListVoteRequests() {
       </TabPanel>
 
       <TabPanel value={tabIndex} index={2}>
-        <Alert severity="info">Executed vote history requires Scan vote results API (follow-up).</Alert>
+        <VoteResultsFilterTable
+          tableType="Executed"
+          openModalWithVoteResult={openModalWithVoteResult}
+          tableBodyId="sv-vote-results-executed-table-body"
+        />
       </TabPanel>
 
       <TabPanel value={tabIndex} index={3}>
-        <Alert severity="info">Rejected vote history requires Scan vote results API (follow-up).</Alert>
+        <VoteResultsFilterTable
+          tableType="Rejected"
+          openModalWithVoteResult={openModalWithVoteResult}
+          tableBodyId="sv-vote-results-rejected-table-body"
+        />
       </TabPanel>
+
+      <ProposalListingSection
+        sectionTitle="Vote History"
+        data={voteHistoryQuery.voteHistory}
+        noDataMessage="No data to show. You can see your vote history here after proposals meet their threshold deadline."
+        uniqueId="vote-history"
+        showStatus
+        showVoteStats
+        fetchNextPage={() => {
+          void voteHistoryQuery.fetchNextPage();
+        }}
+        hasNextPage={voteHistoryQuery.hasNextPage}
+        isFetchingNextPage={voteHistoryQuery.isFetchingNextPage}
+      />
 
       <Modal
         open={modalState.open}
@@ -142,7 +173,7 @@ export function ListVoteRequests() {
         <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }}>
           <ClickAwayListener onClickAway={handleClose}>
             <Container maxWidth="md" sx={{ mt: 8, mb: 4 }}>
-              <Card variant="outlined">
+              <Card variant="elevation">
                 <CardHeader
                   title="Vote Request"
                   id="vote-request-modal-title"
@@ -157,6 +188,38 @@ export function ListVoteRequests() {
                     modalState={modalState}
                     dsoInfo={dsoInfo}
                     knownRequests={voteRequests}
+                  />
+                )}
+              </Card>
+            </Container>
+          </ClickAwayListener>
+        </Box>
+      </Modal>
+
+      <Modal
+        open={resultModalState.open}
+        onClose={handleClose}
+        aria-labelledby="vote-result-modal-title"
+        slotProps={{ root: { id: 'vote-result-modal-root' } }}
+      >
+        <Box sx={{ flex: 1, overflowY: 'auto', maxHeight: '100%' }}>
+          <ClickAwayListener onClickAway={handleClose}>
+            <Container maxWidth="md" sx={{ mt: 8, mb: 4 }}>
+              <Card variant="elevation">
+                <CardHeader
+                  title="Vote Result"
+                  id="vote-result-modal-title"
+                  action={
+                    <IconButton id="vote-result-modal-close-button" onClick={handleClose} aria-label="Close">
+                      <CloseIcon />
+                    </IconButton>
+                  }
+                />
+                {resultModalState.open && (
+                  <VoteResultModalView
+                    voteResult={resultModalState.voteResult}
+                    dsoInfo={dsoInfo}
+                    effectiveAt={resultModalState.effectiveAt}
                   />
                 )}
               </Card>

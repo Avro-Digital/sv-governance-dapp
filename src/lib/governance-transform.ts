@@ -7,16 +7,19 @@ import dayjs from 'dayjs';
 import { getVoteRequestRouteId } from '@/lib/scan-client';
 import type {
   ScanActionRequiringConfirmation,
+  ScanCloseVoteRequestResult,
   ScanDsoInfoResponse,
   ScanSvInfo,
   ScanVote,
   ScanVoteRequestContract,
+  ScanVoteRequestOutcome,
 } from '@/lib/scan-types';
 import type {
   ActionRequiredItem,
   ProposalDetailView,
   ProposalDetailsView,
   ProposalListingItem,
+  ProposalListingStatus,
   ProposalVote,
   SupportedActionTag,
   YourVoteStatus,
@@ -311,4 +314,97 @@ export function splitVoteRequestsForSv(
   }
 
   return { actionRequired, inflight };
+}
+
+export type VoteRequestResultTableType = 'Executed' | 'Rejected';
+
+export function getVoteResultStatus(outcome: ScanVoteRequestOutcome | undefined): ProposalListingStatus {
+  if (outcome === undefined) {
+    return 'Unknown';
+  }
+
+  switch (outcome.tag) {
+    case 'VRO_Accepted': {
+      const effectiveAt = outcome.value?.effectiveAt;
+      if (typeof effectiveAt === 'string' && dayjs(effectiveAt).isBefore(dayjs())) {
+        return 'Implemented';
+      }
+      return 'Accepted';
+    }
+    case 'VRO_Expired':
+      return 'Expired';
+    case 'VRO_Rejected':
+      return 'Rejected';
+    default:
+      return 'Unknown';
+  }
+}
+
+function getVoteResultEffectiveAt(result: ScanCloseVoteRequestResult): string {
+  if (result.outcome.tag === 'VRO_Accepted') {
+    const effectiveAt = result.outcome.value?.effectiveAt;
+    if (typeof effectiveAt === 'string') {
+      return formatDateTime(effectiveAt);
+    }
+  }
+  return formatDateTime(result.completedAt);
+}
+
+export function toVoteHistoryListingItem(
+  result: ScanCloseVoteRequestResult,
+  dsoInfo: ScanDsoInfoResponse,
+  svPartyId: string,
+  amuletName: string = DEFAULT_AMULET_NAME,
+): ProposalListingItem {
+  const votes = parseVoteEntries(result.request.votes);
+  const routeId = result.request.trackingCid ?? result.request.dso;
+
+  return {
+    contractId: routeId,
+    actionName: getActionName(result.request.action, amuletName),
+    description: result.request.reason.body,
+    votingThresholdDeadline: formatDateTime(result.request.voteBefore),
+    voteTakesEffect: getVoteResultEffectiveAt(result),
+    yourVote: computeYourVote(votes, svPartyId),
+    status: getVoteResultStatus(result.outcome),
+    voteStats: computeVoteStats(votes),
+    acceptanceThreshold: BigInt(dsoInfo.voting_threshold),
+  };
+}
+
+export function buildVoteHistoryListing(
+  results: readonly ScanCloseVoteRequestResult[],
+  dsoInfo: ScanDsoInfoResponse,
+  svPartyId: string,
+  amuletName: string = DEFAULT_AMULET_NAME,
+): readonly ProposalListingItem[] {
+  const now = dayjs();
+
+  return results
+    .filter((result) => {
+      if (result.outcome.tag === 'VRO_Accepted') {
+        const effectiveAt = result.outcome.value?.effectiveAt;
+        return typeof effectiveAt === 'string' && dayjs(effectiveAt).isBefore(now);
+      }
+      return result.outcome.tag === 'VRO_Expired' || result.outcome.tag === 'VRO_Rejected';
+    })
+    .map((result) => toVoteHistoryListingItem(result, dsoInfo, svPartyId, amuletName));
+}
+
+export function filterVoteResultsForTable(
+  results: readonly ScanCloseVoteRequestResult[],
+  tableType: VoteRequestResultTableType,
+): readonly ScanCloseVoteRequestResult[] {
+  const now = dayjs();
+
+  return results.filter((result) => {
+    if (tableType === 'Executed') {
+      return (
+        result.outcome.tag === 'VRO_Accepted' &&
+        typeof result.outcome.value?.effectiveAt === 'string' &&
+        dayjs(result.outcome.value.effectiveAt).isBefore(now)
+      );
+    }
+    return result.outcome.tag === 'VRO_Rejected' || result.outcome.tag === 'VRO_Expired';
+  });
 }

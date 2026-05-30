@@ -22,7 +22,11 @@ M2.3 extracted the **governance dashboard** table (`ProposalListingSection` from
 
 | Reference UX | Splice source | Status |
 | --- | --- | --- |
-| Tabbed list (Action Needed / In Progress / …) | `apps/common/frontend/src/components/votes/ListVoteRequests.tsx` | **In progress** — [AVR-2481](https://linear.app/avro-digital/issue/AVR-2481) |
+| Tabbed list (Action Needed / In Progress / …) | `apps/common/frontend/src/components/votes/ListVoteRequests.tsx` | Done — [AVR-2481](https://linear.app/avro-digital/issue/AVR-2481) |
+| Executed / Rejected tabs | `VoteResultsFilterTable.tsx` + Scan vote results | Done |
+| Vote history section | `apps/sv/frontend/src/routes/governance.tsx` | Done — `ProposalListingSection` below tabs |
+| Splice dark theme | `apps/common/frontend/src/theme/` | Done |
+| Config diff accordion | `PrettyJsonDiff` + `JsonDiffAccordion` in modal `ActionView` | Done — `SRARC_SetConfig` |
 | DataGrid rows (Tracking Id, Requester, dates) | `apps/common/frontend/src/components/votes/VoteRequestFilterTable.tsx` | Done — `@mui/x-data-grid` |
 | Detail modal | `apps/common/frontend/src/components/votes/VoteModalContent.tsx` + `VoteForm.tsx` | Done — Splice layout; config diff accordion deferred |
 | Legacy vote route | `apps/sv/frontend/src/components/votes/VoteRequest.tsx` | Wrapper around `ListVoteRequests` |

@@ -69,9 +69,39 @@ export interface ScanDsoInfoResponse {
     readonly contract: {
       readonly payload: {
         readonly svs: ReadonlyArray<readonly [string, ScanSvInfo]>;
+        readonly config?: Record<string, unknown>;
       };
     };
   };
+}
+
+export interface ScanVoteRequestOutcome {
+  readonly tag: string;
+  readonly value?: Record<string, unknown>;
+}
+
+/** Closed vote request result from Scan `listVoteRequestResults`. */
+export interface ScanCloseVoteRequestResult {
+  readonly request: ScanVoteRequestPayload;
+  readonly completedAt: string;
+  readonly outcome: ScanVoteRequestOutcome;
+  readonly offboardedVoters?: readonly string[];
+  readonly abstainingSvs?: readonly string[];
+}
+
+export interface ScanListVoteResultsRequest {
+  readonly limit: number;
+  readonly accepted?: boolean;
+  readonly actionName?: string;
+  readonly requester?: string;
+  readonly effectiveFrom?: string;
+  readonly effectiveTo?: string;
+  readonly pageToken?: number;
+}
+
+export interface ScanListVoteResultsResponse {
+  readonly dso_rules_vote_results: readonly ScanCloseVoteRequestResult[];
+  readonly next_page_token?: number | null;
 }
 
 export interface GovernanceSnapshot {

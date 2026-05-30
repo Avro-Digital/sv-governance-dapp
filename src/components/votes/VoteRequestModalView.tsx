@@ -35,6 +35,7 @@ export function VoteRequestModalView({ contract, dsoInfo, svPartyId }: VoteReque
       acceptedVotes={acceptedVotes}
       rejectedVotes={rejectedVotes}
       curSvVote={curSvVote}
+      dsoConfig={dsoInfo.dso_rules.contract.payload.config}
       voteForm={(cid, vote) => <VoteForm voteRequestCid={cid} vote={vote} />}
     />
   );

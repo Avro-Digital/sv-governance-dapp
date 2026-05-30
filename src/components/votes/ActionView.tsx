@@ -3,6 +3,8 @@
 
 import Typography from '@mui/material/Typography';
 
+import { JsonDiffAccordion } from '@/components/governance/JsonDiffAccordion';
+import { PrettyJsonDiff } from '@/components/governance/PrettyJsonDiff';
 import { ActionValueTable } from '@/components/votes/ActionValueTable';
 import { DateWithDurationDisplay } from '@/components/votes/DateWithDurationDisplay';
 import { PartyId } from '@/components/votes/PartyId';
@@ -11,9 +13,10 @@ import type { ScanActionRequiringConfirmation } from '@/lib/scan-types';
 
 interface ActionViewProps {
   readonly action: ScanActionRequiringConfirmation;
+  readonly dsoConfig?: Record<string, unknown> | undefined;
 }
 
-export function ActionView({ action }: ActionViewProps) {
+export function ActionView({ action, dsoConfig }: ActionViewProps) {
   const actionType = action.tag;
 
   if (action.tag === 'ARC_DsoRules' && action.value.dsoAction !== undefined) {
@@ -84,8 +87,33 @@ export function ActionView({ action }: ActionViewProps) {
             }}
           />
         );
-      case 'SRARC_SetConfig':
-        return <ActionValueTable actionType={actionType} actionName={dsoAction.tag} />;
+      case 'SRARC_SetConfig': {
+        const newConfig = dsoAction.value.newConfig;
+        const baseConfig = dsoAction.value.baseConfig ?? dsoConfig;
+        const hasDiff =
+          newConfig !== undefined &&
+          newConfig !== null &&
+          typeof newConfig === 'object' &&
+          baseConfig !== undefined &&
+          typeof baseConfig === 'object';
+
+        return (
+          <>
+            <ActionValueTable actionType={actionType} actionName={dsoAction.tag} />
+            {hasDiff && (
+              <JsonDiffAccordion>
+                <PrettyJsonDiff
+                  changes={{
+                    newConfig: newConfig as Record<string, unknown>,
+                    actualConfig: baseConfig as Record<string, unknown>,
+                    baseConfig: baseConfig as Record<string, unknown>,
+                  }}
+                />
+              </JsonDiffAccordion>
+            )}
+          </>
+        );
+      }
       default:
         return <ActionValueTable actionType={actionType} actionName={dsoAction.tag} />;
     }

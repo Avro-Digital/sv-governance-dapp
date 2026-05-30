@@ -36,6 +36,7 @@ interface VoteModalContentProps {
   readonly voteForm?: (voteRequestContractId: string, currentSvVote: ScanVote | undefined) => ReactNode;
   readonly curSvVote?: ScanVote | undefined;
   readonly effectiveAt?: Date | undefined;
+  readonly dsoConfig?: Record<string, unknown> | undefined;
 }
 
 export function VoteModalContent({
@@ -50,6 +51,7 @@ export function VoteModalContent({
   voteForm,
   curSvVote,
   effectiveAt,
+  dsoConfig,
 }: VoteModalContentProps) {
   const proposalUrl = displayLinkUrl(reason.url);
 
@@ -57,7 +59,7 @@ export function VoteModalContent({
     <CardContent sx={{ px: { xs: 2, md: 8 } }}>
       <Stack direction="column" mb={4} spacing={1}>
         <Typography variant="h5">Requested Action</Typography>
-        <ActionView action={action} />
+        <ActionView action={action} dsoConfig={dsoConfig} />
       </Stack>
 
       <Stack direction="column" mb={4} spacing={1}>

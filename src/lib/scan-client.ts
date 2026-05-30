@@ -4,6 +4,8 @@ import type {
   GovernanceSnapshot,
   ScanDsoInfoResponse,
   ScanListVoteRequestsResponse,
+  ScanListVoteResultsRequest,
+  ScanListVoteResultsResponse,
   ScanLookupVoteRequestResponse,
   ScanVoteRequestContract,
 } from '@/lib/scan-types';
@@ -128,4 +130,17 @@ export function getVoteRequestRouteId(contract: ScanVoteRequestContract): string
 export async function fetchGovernanceSnapshot(): Promise<GovernanceSnapshot> {
   const [dsoInfo, voteRequests] = await Promise.all([getDsoInfo(), listDsoRulesVoteRequests()]);
   return { dsoInfo, voteRequests };
+}
+
+/**
+ * Lists closed vote request results (`scan.yaml`: POST `/v0/admin/sv/voteresults`).
+ */
+export async function listVoteRequestResults(
+  request: ScanListVoteResultsRequest,
+): Promise<ScanListVoteResultsResponse> {
+  return scanFetch<ScanListVoteResultsResponse>('/v0/admin/sv/voteresults', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
 }

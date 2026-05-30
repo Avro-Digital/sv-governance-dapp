@@ -1,0 +1,96 @@
+{
+  "dso_rules_vote_results": [
+    {
+      "request": {
+        "dso": "DSO::1220da5bac6c651bdfab7b30576137b864ba7a1f82cdd0f38c72e231db38b70b1be7",
+        "votes": [
+          [
+            "sv",
+            {
+              "sv": "sv::12200b234519c3471f6a93e6988514c1bf20d615b795d28dd4fa0257039a65eb1cc5",
+              "accept": true,
+              "reason": {
+                "url": "",
+                "body": "Approved after review."
+              }
+            }
+          ]
+        ],
+        "voteBefore": "2026-05-01T22:25:06.439685Z",
+        "requester": "sv",
+        "reason": {
+          "url": "http://sv.localhost:4000",
+          "body": "Historical weight update"
+        },
+        "trackingCid": "mock-executed-vote::1220deadbeef",
+        "targetEffectiveAt": "2026-05-02T22:25:06.412Z",
+        "action": {
+          "tag": "ARC_DsoRules",
+          "value": {
+            "dsoAction": {
+              "tag": "SRARC_UpdateSvRewardWeight",
+              "value": {
+                "svParty": "sv::12200b234519c3471f6a93e6988514c1bf20d615b795d28dd4fa0257039a65eb1cc5",
+                "newRewardWeight": "10000"
+              }
+            }
+          }
+        }
+      },
+      "completedAt": "2026-05-02T22:25:33.702685Z",
+      "outcome": {
+        "tag": "VRO_Accepted",
+        "value": {
+          "effectiveAt": "2026-05-02T22:25:06.412Z"
+        }
+      },
+      "offboardedVoters": [],
+      "abstainingSvs": []
+    },
+    {
+      "request": {
+        "dso": "DSO::1220da5bac6c651bdfab7b30576137b864ba7a1f82cdd0f38c72e231db38b70b1be7",
+        "votes": [
+          [
+            "sv",
+            {
+              "sv": "sv::12200b234519c3471f6a93e6988514c1bf20d615b795d28dd4fa0257039a65eb1cc5",
+              "accept": false,
+              "reason": {
+                "url": "",
+                "body": "Not convinced."
+              }
+            }
+          ]
+        ],
+        "voteBefore": "2026-04-01T22:25:06.439685Z",
+        "requester": "sv",
+        "reason": {
+          "url": "",
+          "body": "Rejected config tweak"
+        },
+        "trackingCid": "mock-rejected-vote::1220badcafe",
+        "action": {
+          "tag": "ARC_DsoRules",
+          "value": {
+            "dsoAction": {
+              "tag": "SRARC_SetConfig",
+              "value": {
+                "newConfig": { "voteRequestTimeout": { "microseconds": "604800000000" } },
+                "baseConfig": { "voteRequestTimeout": { "microseconds": "86400000000" } }
+              }
+            }
+          }
+        }
+      },
+      "completedAt": "2026-04-02T22:25:33.702685Z",
+      "outcome": {
+        "tag": "VRO_Rejected",
+        "value": {}
+      },
+      "offboardedVoters": [],
+      "abstainingSvs": []
+    }
+  ],
+  "next_page_token": null
+}
