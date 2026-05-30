@@ -50,6 +50,28 @@ Read path uses the **Scan API** (`VITE_SCAN_URL`), not SV Admin OpenAPI:
 
 Implementation: `src/lib/scan-client.ts`, `src/lib/governance-transform.ts`, hooks under `src/hooks/`.
 
+## UI extraction principles
+
+Splice’s explicit ask is **lift-and-shift** of the existing SV operator UI — layout, interaction, and visual tokens — not a redesign. That UI has been through community UX review.
+
+| Aspect | Splice source | This dApp (target) |
+| --- | --- | --- |
+| Theme | `apps/common/frontend/src/theme/` (`mode: 'dark'`, Inter/Termina, component overrides) | Port into `src/theme/` — **required for parity**, not optional |
+| Vote Requests page | `CreateVoteRequest` + `SvListVoteRequests` stacked | See scope boundary below |
+
+The interim light MUI scaffold in `src/theme/index.ts` predates this requirement and should be replaced with the Splice theme extraction (tracked under [AVR-2481](https://linear.app/avro-digital/issue/AVR-2481)).
+
+## Vote Requests page — scope boundary
+
+In Splice, `apps/sv/frontend/src/components/votes/VoteRequest.tsx` renders **two** stacked surfaces:
+
+1. **`CreateVoteRequest`** — operator proposes a governance action (`SvAdminClient.createVoteRequest`, OIDC)
+2. **`SvListVoteRequests`** — enumerate open requests, open detail modal, cast/edit vote
+
+This dApp’s `/votes` route currently implements **(2) only**. That is intentional for M2: external governance **voters** discover and cast votes on existing proposals via Scan reads + wallet signing; they do not hold SV Admin credentials to create proposals.
+
+**Workflow implication:** users accustomed to the full Splice page get list/review/vote here but must still **initiate** proposals through the SV operator app (e.g. localnet `http://sv.localhost:4000`) until a future ticket adds `CreateVoteRequest` + an operator write path. Document this in operator runbooks; do not assume `/votes` is a drop-in replacement for the entire Splice Vote Request route.
+
 ## Planned topics
 
 - Mapping `CastVoteArgs` → DAML `VoteRequest` choice exercise commands
