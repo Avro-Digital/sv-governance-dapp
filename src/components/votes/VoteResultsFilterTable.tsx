@@ -16,6 +16,7 @@ import { DateDisplay } from '@/components/votes/DateDisplay';
 import type { VoteRequestResultTableType, VoteResultModalState } from '@/components/votes/types';
 import { useVoteRequestResults } from '@/hooks/useVoteRequestResults';
 import { filterVoteResultsForTable, getRawActionTag } from '@/lib/governance-transform';
+import { getClosedVoteResultRowId } from '@/lib/scan-client';
 import type { ScanCloseVoteRequestResult } from '@/lib/scan-types';
 
 interface VoteResultsFilterTableProps {
@@ -39,8 +40,8 @@ export function VoteResultsFilterTable({
     return filterVoteResultsForTable(voteResultsQuery.data.dso_rules_vote_results, tableType);
   }, [voteResultsQuery.data, tableType]);
 
-  const rows = filteredResults.map((result, index) => ({
-    id: index,
+  const rows = filteredResults.map((result) => ({
+    id: getClosedVoteResultRowId(result),
     actionName: getRawActionTag(result.request.action),
     requester: result.request.requester,
     expiresAt: new Date(result.request.voteBefore),

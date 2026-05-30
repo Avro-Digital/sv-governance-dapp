@@ -4,7 +4,7 @@
 
 import dayjs from 'dayjs';
 
-import { getVoteRequestRouteId } from '@/lib/scan-client';
+import { getClosedVoteResultRowId, getVoteRequestRouteId } from '@/lib/scan-client';
 import type {
   ScanActionRequiringConfirmation,
   ScanCloseVoteRequestResult,
@@ -318,6 +318,7 @@ export function splitVoteRequestsForSv(
 
 export type VoteRequestResultTableType = 'Executed' | 'Rejected';
 
+/** `Accepted` is filtered out of vote history before status is shown; only closed outcomes reach the UI. */
 export function getVoteResultStatus(outcome: ScanVoteRequestOutcome | undefined): ProposalListingStatus {
   if (outcome === undefined) {
     return 'Unknown';
@@ -357,7 +358,7 @@ export function toVoteHistoryListingItem(
   amuletName: string = DEFAULT_AMULET_NAME,
 ): ProposalListingItem {
   const votes = parseVoteEntries(result.request.votes);
-  const routeId = result.request.trackingCid ?? result.request.dso;
+  const routeId = getClosedVoteResultRowId(result);
 
   return {
     contractId: routeId,

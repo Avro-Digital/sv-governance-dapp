@@ -127,6 +127,25 @@ export function getVoteRequestRouteId(contract: ScanVoteRequestContract): string
   return contract.payload.trackingCid ?? contract.contract_id;
 }
 
+/** Display/route id for closed vote results — never fall back to DSO party id. */
+export function getClosedVoteRequestRouteId(
+  request: ScanVoteRequestContract['payload'],
+): string | undefined {
+  return request.trackingCid ?? undefined;
+}
+
+/** Stable DataGrid row id when {@link getClosedVoteRequestRouteId} is absent. */
+export function getClosedVoteResultRowId(result: {
+  readonly request: ScanVoteRequestContract['payload'];
+  readonly completedAt: string;
+  readonly outcome: { readonly tag: string };
+}): string {
+  return (
+    getClosedVoteRequestRouteId(result.request) ??
+    `${result.completedAt}:${result.outcome.tag}:${result.request.requester}`
+  );
+}
+
 export async function fetchGovernanceSnapshot(): Promise<GovernanceSnapshot> {
   const [dsoInfo, voteRequests] = await Promise.all([getDsoInfo(), listDsoRulesVoteRequests()]);
   return { dsoInfo, voteRequests };

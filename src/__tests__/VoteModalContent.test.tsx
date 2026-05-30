@@ -39,4 +39,44 @@ describe('VoteModalContent', () => {
       'http://sv.localhost:4000',
     );
   });
+
+  it('shows Expired for open requests past the deadline', () => {
+    const votes = contract.payload.votes.map(([, vote]) => vote);
+
+    render(
+      <VoteModalContent
+        voteRequestContractId={contract.contract_id}
+        action={contract.payload.action}
+        requester={contract.payload.requester}
+        getMemberName={() => 'sv'}
+        reason={contract.payload.reason}
+        voteBefore={new Date('2020-01-01T00:00:00Z')}
+        acceptedVotes={votes.filter((vote) => vote.accept)}
+        rejectedVotes={votes.filter((vote) => !vote.accept)}
+        expiryContext="open"
+      />,
+    );
+
+    expect(screen.getByTestId('vote-request-modal-expires-at')).toHaveTextContent('Expired');
+  });
+
+  it('shows Did not expire for closed results resolved before the deadline', () => {
+    const votes = contract.payload.votes.map(([, vote]) => vote);
+
+    render(
+      <VoteModalContent
+        voteRequestContractId="mock-executed-vote::1220deadbeef"
+        action={contract.payload.action}
+        requester={contract.payload.requester}
+        getMemberName={() => 'sv'}
+        reason={contract.payload.reason}
+        voteBefore={new Date('2020-01-01T00:00:00Z')}
+        acceptedVotes={votes.filter((vote) => vote.accept)}
+        rejectedVotes={votes.filter((vote) => !vote.accept)}
+        expiryContext="closed"
+      />,
+    );
+
+    expect(screen.getByTestId('vote-request-modal-expires-at')).toHaveTextContent('Did not expire');
+  });
 });

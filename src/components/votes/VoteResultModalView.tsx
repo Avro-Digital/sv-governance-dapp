@@ -3,6 +3,7 @@
 
 import { VoteModalContent } from '@/components/votes/VoteModalContent';
 import { getSvMemberName, parseVoteEntries } from '@/lib/governance-transform';
+import { getClosedVoteRequestRouteId } from '@/lib/scan-client';
 import type { ScanCloseVoteRequestResult, ScanDsoInfoResponse } from '@/lib/scan-types';
 
 interface VoteResultModalViewProps {
@@ -15,7 +16,7 @@ export function VoteResultModalView({ voteResult, dsoInfo, effectiveAt }: VoteRe
   const votes = parseVoteEntries(voteResult.request.votes);
   const acceptedVotes = votes.filter((vote) => vote.accept);
   const rejectedVotes = votes.filter((vote) => !vote.accept);
-  const routeId = voteResult.request.trackingCid ?? voteResult.request.dso;
+  const routeId = getClosedVoteRequestRouteId(voteResult.request) ?? '';
 
   return (
     <VoteModalContent
@@ -29,6 +30,8 @@ export function VoteResultModalView({ voteResult, dsoInfo, effectiveAt }: VoteRe
       acceptedVotes={acceptedVotes}
       rejectedVotes={rejectedVotes}
       dsoConfig={dsoInfo.dso_rules.contract.payload.config}
+      expiryContext="closed"
+      expiredWithoutResolution={voteResult.outcome.tag === 'VRO_Expired'}
     />
   );
 }

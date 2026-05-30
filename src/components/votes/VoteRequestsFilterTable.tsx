@@ -63,7 +63,7 @@ export function VoteRequestsFilterTable({
         const expiresAt = params.value as Date;
         return dayjs(expiresAt).isBefore(dayjs()) ? (
           <Typography variant="body2" data-testid="vote-row-expiry-date">
-            Did not expire
+            Expired
           </Typography>
         ) : (
           <DateDisplay datetime={expiresAt} id="vote-row-expiry-date" />
@@ -92,8 +92,8 @@ export function VoteRequestsFilterTable({
     },
   ];
 
-  const rows = voteRequests.map((request, index) => ({
-    id: index,
+  const rows = voteRequests.map((request) => ({
+    id: getVoteRequestRouteId(request),
     trackingCid: getVoteRequestRouteId(request),
     action: getRawActionTag(request.payload.action),
     requester: request.payload.requester,

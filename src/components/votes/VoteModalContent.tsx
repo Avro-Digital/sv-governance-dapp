@@ -37,6 +37,10 @@ interface VoteModalContentProps {
   readonly curSvVote?: ScanVote | undefined;
   readonly effectiveAt?: Date | undefined;
   readonly dsoConfig?: Record<string, unknown> | undefined;
+  /** Open inflight requests vs closed results from vote-results API. */
+  readonly expiryContext?: 'open' | 'closed';
+  /** When `expiryContext` is `closed` and outcome is `VRO_Expired`. */
+  readonly expiredWithoutResolution?: boolean;
 }
 
 export function VoteModalContent({
@@ -52,6 +56,8 @@ export function VoteModalContent({
   curSvVote,
   effectiveAt,
   dsoConfig,
+  expiryContext = 'open',
+  expiredWithoutResolution = false,
 }: VoteModalContentProps) {
   const proposalUrl = displayLinkUrl(reason.url);
 
@@ -72,12 +78,18 @@ export function VoteModalContent({
                   <Typography variant="h6">Contract Id</Typography>
                 </TableCell>
                 <TableCell>
-                  <CopyableTypography
-                    variant="body2"
-                    id="vote-request-modal-content-contract-id"
-                    text={voteRequestContractId}
-                    maxWidth="320px"
-                  />
+                  {voteRequestContractId.length > 0 ? (
+                    <CopyableTypography
+                      variant="body2"
+                      id="vote-request-modal-content-contract-id"
+                      text={voteRequestContractId}
+                      maxWidth="320px"
+                    />
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      —
+                    </Typography>
+                  )}
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -125,21 +137,11 @@ export function VoteModalContent({
                   <Typography variant="h6">Expires At</Typography>
                 </TableCell>
                 <TableCell>
-                  {dayjs().isAfter(voteBefore) ? (
-                    <Typography
-                      variant="h6"
-                      id="vote-request-modal-expires-at"
-                      data-testid="vote-request-modal-expires-at"
-                    >
-                      Did not expire
-                    </Typography>
-                  ) : (
-                    <DateWithDurationDisplay
-                      datetime={voteBefore}
-                      enableDuration
-                      id="vote-request-modal-expires-at"
-                    />
-                  )}
+                  <ExpiresAtDisplay
+                    voteBefore={voteBefore}
+                    expiryContext={expiryContext}
+                    expiredWithoutResolution={expiredWithoutResolution}
+                  />
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -212,6 +214,72 @@ export function VoteModalContent({
         </TableContainer>
       </Stack>
     </CardContent>
+  );
+}
+
+function ExpiresAtDisplay({
+  voteBefore,
+  expiryContext,
+  expiredWithoutResolution,
+}: {
+  readonly voteBefore: Date;
+  readonly expiryContext: 'open' | 'closed';
+  readonly expiredWithoutResolution: boolean;
+}) {
+  const pastDeadline = dayjs().isAfter(voteBefore);
+
+  if (expiryContext === 'closed') {
+    if (expiredWithoutResolution) {
+      return (
+        <Typography
+          variant="h6"
+          id="vote-request-modal-expires-at"
+          data-testid="vote-request-modal-expires-at"
+        >
+          Expired
+        </Typography>
+      );
+    }
+
+    if (pastDeadline) {
+      return (
+        <Typography
+          variant="h6"
+          id="vote-request-modal-expires-at"
+          data-testid="vote-request-modal-expires-at"
+        >
+          Did not expire
+        </Typography>
+      );
+    }
+
+    return (
+      <DateWithDurationDisplay
+        datetime={voteBefore}
+        enableDuration
+        id="vote-request-modal-expires-at"
+      />
+    );
+  }
+
+  if (pastDeadline) {
+    return (
+      <Typography
+        variant="h6"
+        id="vote-request-modal-expires-at"
+        data-testid="vote-request-modal-expires-at"
+      >
+        Expired
+      </Typography>
+    );
+  }
+
+  return (
+    <DateWithDurationDisplay
+      datetime={voteBefore}
+      enableDuration
+      id="vote-request-modal-expires-at"
+    />
   );
 }
 

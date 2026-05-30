@@ -72,6 +72,10 @@ This dApp’s `/votes` route currently implements **(2) only**. That is intentio
 
 **Workflow implication:** users accustomed to the full Splice page get list/review/vote here but must still **initiate** proposals through the SV operator app (e.g. localnet `http://sv.localhost:4000`) until a future ticket adds `CreateVoteRequest` + an operator write path. Document this in operator runbooks; do not assume `/votes` is a drop-in replacement for the entire Splice Vote Request route.
 
+**Executed / Rejected tabs:** Splice groups `VRO_Expired` outcomes under the **Rejected** tab (same as here). Operators should expect expired proposals in that tab even though the label reads “Rejected” — not a data bug.
+
+**Fonts:** Inter is loaded from Google Fonts CDN in `index.html` (Splice parity). Self-hosting via `@fontsource` is a future hardening item for supply-chain / offline availability.
+
 ## Planned topics
 
 - Mapping `CastVoteArgs` → DAML `VoteRequest` choice exercise commands

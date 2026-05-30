@@ -6,6 +6,7 @@ import { buildVoteHistoryListing } from '@/lib/governance-transform';
 import { fetchVoteRequestResults } from '@/lib/mock-vote-results';
 import type { ScanDsoInfoResponse, ScanListVoteResultsRequest } from '@/lib/scan-types';
 
+/** Scan vote-results pages are capped at 500; sufficient for localnet/M2 parity tabs. */
 const DEFAULT_LIMIT = 500;
 
 export function useVoteRequestResults(query: Omit<ScanListVoteResultsRequest, 'limit' | 'pageToken'>) {

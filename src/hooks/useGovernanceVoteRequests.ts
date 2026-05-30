@@ -10,7 +10,7 @@ import { useIdentityStore } from '@/stores/identity';
 function sortVoteRequestsNewestFirst(
   voteRequests: readonly ScanVoteRequestContract[],
 ): readonly ScanVoteRequestContract[] {
-  return [...voteRequests].sort((a, b) => b.created_at.localeCompare(a.created_at));
+  return [...voteRequests].sort((a, b) => (a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0));
 }
 
 export function useGovernanceVoteRequests() {
