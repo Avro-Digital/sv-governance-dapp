@@ -1,6 +1,8 @@
 // Part of the SV Governance dApp — Canton Foundation Development Fund grant #223
 // Adapted from apps/common/frontend/src/components/CopyableTypography.tsx @ canton-network/splice 80488155
 
+import type { ReactNode } from 'react';
+
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import IconButton from '@mui/material/IconButton';
 import Typography, { type TypographyProps } from '@mui/material/Typography';

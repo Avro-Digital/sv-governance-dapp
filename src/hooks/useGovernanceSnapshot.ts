@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
+import { fetchMockGovernanceSnapshot } from '@/lib/mock-governance-snapshot';
 import { fetchGovernanceSnapshot, getScanApiBaseUrl } from '@/lib/scan-client';
 
 const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_VOTES !== 'false';
@@ -10,9 +11,8 @@ export function useGovernanceSnapshot() {
   const scanUrl = import.meta.env.VITE_SCAN_URL?.trim() ?? '';
 
   return useQuery({
-    queryKey: ['governanceSnapshot', scanUrl],
-    queryFn: fetchGovernanceSnapshot,
-    enabled: !USE_MOCK_DATA,
+    queryKey: ['governanceSnapshot', USE_MOCK_DATA, scanUrl],
+    queryFn: () => (USE_MOCK_DATA ? fetchMockGovernanceSnapshot() : fetchGovernanceSnapshot()),
     staleTime: 30_000,
   });
 }
