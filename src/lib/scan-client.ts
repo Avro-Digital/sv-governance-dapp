@@ -49,11 +49,22 @@ export async function getDsoInfo(): Promise<ScanDsoInfoResponse> {
   return scanFetch<ScanDsoInfoResponse>('/v0/dso');
 }
 
+/**
+ * Lists inflight DSO vote requests.
+ *
+ * Uses `GET /v0/admin/sv/voterequests` — the same path as Splice Scan/SV frontends
+ * (`scan.yaml` operationId `listDsoRulesVoteRequests`). Verified on localnet: returns
+ * 200 without auth via `scan.localhost` nginx (no `/admin` gate on read path).
+ */
 export async function listDsoRulesVoteRequests(): Promise<readonly ScanVoteRequestContract[]> {
   const response = await scanFetch<ScanListVoteRequestsResponse>('/v0/admin/sv/voterequests');
   return response.dso_rules_vote_requests;
 }
 
+/**
+ * Lookup by ledger `VoteRequest` contract ID (`scan.yaml`: `/v0/voterequests/{id}`).
+ * Does not accept tracking CIDs — use {@link resolveVoteRequest} for route IDs.
+ */
 export async function lookupDsoRulesVoteRequest(
   contractId: string,
 ): Promise<ScanVoteRequestContract | null> {
@@ -68,6 +79,50 @@ export async function lookupDsoRulesVoteRequest(
     }
     throw error;
   }
+}
+
+export function findVoteRequestInSnapshot(
+  routeId: string,
+  voteRequests: readonly ScanVoteRequestContract[],
+): ScanVoteRequestContract | undefined {
+  return voteRequests.find(
+    (contract) =>
+      contract.contract_id === routeId ||
+      contract.payload.trackingCid === routeId ||
+      getVoteRequestRouteId(contract) === routeId,
+  );
+}
+
+/**
+ * Resolves a vote request from a URL/list route id (tracking CID or contract ID).
+ * Lookup endpoint only accepts contract IDs; when `trackingCid` is set we fall back
+ * to the snapshot match and re-fetch by `contract_id`.
+ */
+export async function resolveVoteRequest(
+  routeId: string,
+  knownRequests: readonly ScanVoteRequestContract[] = [],
+): Promise<ScanVoteRequestContract | null> {
+  const direct = await lookupDsoRulesVoteRequest(routeId);
+  if (direct !== null) {
+    return direct;
+  }
+
+  const known = findVoteRequestInSnapshot(routeId, knownRequests);
+  if (known === undefined) {
+    return null;
+  }
+
+  if (known.contract_id !== routeId) {
+    const byContractId = await lookupDsoRulesVoteRequest(known.contract_id);
+    return byContractId ?? known;
+  }
+
+  return null;
+}
+
+/** Route/list id — mirrors Splice `trackingCid || contractId`. */
+export function getVoteRequestRouteId(contract: ScanVoteRequestContract): string {
+  return contract.payload.trackingCid ?? contract.contract_id;
 }
 
 export async function fetchGovernanceSnapshot(): Promise<GovernanceSnapshot> {

@@ -18,6 +18,7 @@ export function useGovernanceSnapshot() {
 }
 
 export function useScanConfigured(): boolean {
+  // TODO(AVR-2481): use in VoteList empty-state when VITE_SCAN_URL is missing in live mode
   if (USE_MOCK_DATA) {
     return true;
   }

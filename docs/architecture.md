@@ -43,6 +43,8 @@ Read path uses the **Scan API** (`VITE_SCAN_URL`), not SV Admin OpenAPI:
 - External voters do not have operator OIDC credentials for SV Admin.
 - Scan exposes the same `listDsoRulesVoteRequests` / `lookupDsoRulesVoteRequest` endpoints used by the Scan frontend.
 - Localnet: `http://scan.localhost:4000/api/scan` (nginx on `SV_UI_PORT` 4000).
+- List endpoint: `GET /v0/admin/sv/voterequests` (same as Splice Scan; verified 200 on localnet without auth gate).
+- Lookup: `GET /v0/voterequests/{contract_id}` — accepts ledger contract IDs only; route IDs may use `trackingCid` (see `resolveVoteRequest` in `scan-client.ts`).
 
 `VITE_SV_PARTY_ID` identifies which SV’s vote to highlight until wallet connect (AVR-2476) replaces it.
 

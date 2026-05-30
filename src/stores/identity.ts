@@ -35,6 +35,12 @@ function resolveLiveIdentity(): SvIdentity {
 
 const INITIAL_IDENTITY = USE_MOCK_DATA ? MOCK_IDENTITY : resolveLiveIdentity();
 
+if (!USE_MOCK_DATA && INITIAL_IDENTITY.partyId.length === 0 && import.meta.env.DEV) {
+  console.warn(
+    'VITE_SV_PARTY_ID is empty — vote list will treat all proposals as Action Required. Set from GET /v0/dso sv_party_id until wallet connect (AVR-2476).',
+  );
+}
+
 export const useIdentityStore = create<IdentityState>((set) => ({
   identity: INITIAL_IDENTITY,
   setIdentity: (identity: SvIdentity): void => {

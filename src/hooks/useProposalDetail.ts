@@ -5,8 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useGovernanceSnapshot } from '@/hooks/useGovernanceSnapshot';
 import { toProposalDetailView } from '@/lib/governance-transform';
 import { getMockProposalDetail } from '@/lib/mock-proposals';
-import { lookupDsoRulesVoteRequest } from '@/lib/scan-client';
-import type { ScanDsoInfoResponse } from '@/lib/scan-types';
+import { resolveVoteRequest } from '@/lib/scan-client';
+import type { ScanDsoInfoResponse, ScanVoteRequestContract } from '@/lib/scan-types';
 import { useIdentityStore } from '@/stores/identity';
 import type { ProposalDetailView } from '@/types/governance';
 
@@ -18,11 +18,12 @@ async function fetchMockProposalDetail(contractId: string): Promise<ProposalDeta
 }
 
 async function fetchLiveProposalDetail(
-  contractId: string,
+  routeId: string,
   dsoInfo: ScanDsoInfoResponse,
   svPartyId: string,
+  knownRequests: readonly ScanVoteRequestContract[],
 ): Promise<ProposalDetailView | null> {
-  const contract = await lookupDsoRulesVoteRequest(contractId);
+  const contract = await resolveVoteRequest(routeId, knownRequests);
   if (contract === null) {
     return null;
   }
@@ -46,7 +47,12 @@ export function useProposalDetail(contractId: string) {
       if (snapshotQuery.data === undefined) {
         throw new Error('Governance snapshot not loaded');
       }
-      return fetchLiveProposalDetail(decodedId, snapshotQuery.data.dsoInfo, partyId);
+      return fetchLiveProposalDetail(
+        decodedId,
+        snapshotQuery.data.dsoInfo,
+        partyId,
+        snapshotQuery.data.voteRequests,
+      );
     },
     enabled: !USE_MOCK_DATA && decodedId.length > 0 && snapshotQuery.data !== undefined,
   });

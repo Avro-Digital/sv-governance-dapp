@@ -5,11 +5,14 @@ import { describe, expect, it } from 'vitest';
 import voteRequestsFixture from '@/__fixtures__/scan-vote-requests.json';
 import {
   computeYourVote,
+  getActionName,
+  getVoteRequestContractId,
   parseVoteEntries,
   splitVoteRequestsForSv,
   toProposalDetailView,
   toProposalListingItem,
 } from '@/lib/governance-transform';
+import { findVoteRequestInSnapshot, getVoteRequestRouteId } from '@/lib/scan-client';
 import type { ScanDsoInfoResponse, ScanListVoteRequestsResponse } from '@/lib/scan-types';
 
 const SV_PARTY =
@@ -75,5 +78,41 @@ describe('governance-transform', () => {
     const votes = parseVoteEntries(voteRequest.payload.votes);
     expect(computeYourVote(votes, SV_PARTY)).toBe('accepted');
     expect(computeYourVote(votes, 'missing::1220')).toBe('no-vote');
+  });
+
+  it('uses tracking CID for route ids when present', () => {
+    const tracked = {
+      ...voteRequest,
+      payload: { ...voteRequest.payload, trackingCid: 'tracking-cid::1220abc' },
+    };
+    expect(getVoteRequestContractId(tracked)).toBe('tracking-cid::1220abc');
+    expect(findVoteRequestInSnapshot('tracking-cid::1220abc', [tracked])).toBe(tracked);
+    expect(getVoteRequestRouteId(tracked)).toBe('tracking-cid::1220abc');
+  });
+
+  it('maps unknown action tags to unsupported detail shape', () => {
+    const unknownAction = {
+      ...voteRequest,
+      payload: {
+        ...voteRequest.payload,
+        action: {
+          tag: 'ARC_AmuletRules',
+          value: {
+            amuletRulesAction: {
+              tag: 'CRARC_AddFutureAmuletConfigSchedule',
+              value: {},
+            },
+          },
+        },
+      },
+    };
+
+    expect(getActionName(unknownAction.payload.action)).toBe('CRARC_AddFutureAmuletConfigSchedule');
+
+    const detail = toProposalDetailView(unknownAction, mockDsoInfo, SV_PARTY);
+    expect(detail.proposalDetails.action).toBe('unsupported');
+    if (detail.proposalDetails.action === 'unsupported') {
+      expect(detail.proposalDetails.rawActionTag).toBe('CRARC_AddFutureAmuletConfigSchedule');
+    }
   });
 });

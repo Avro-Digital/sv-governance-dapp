@@ -4,6 +4,7 @@
 
 import dayjs from 'dayjs';
 
+import { getVoteRequestRouteId } from '@/lib/scan-client';
 import type {
   ScanActionRequiringConfirmation,
   ScanDsoInfoResponse,
@@ -61,6 +62,25 @@ function isSupportedActionTag(tag: string): tag is SupportedActionTag {
   return tag in actionTagToTitle();
 }
 
+/** Raw DAML action tag for display when not in {@link SupportedActionTag}. */
+export function getRawActionTag(action: ScanActionRequiringConfirmation): string {
+  if (action.tag === 'ARC_DsoRules' && action.value.dsoAction !== undefined) {
+    return action.value.dsoAction.tag;
+  }
+  if (action.tag === 'ARC_AmuletRules' && action.value.amuletRulesAction !== undefined) {
+    return action.value.amuletRulesAction.tag;
+  }
+  return action.tag;
+}
+
+export function getActionName(
+  action: ScanActionRequiringConfirmation,
+  amuletName: string = DEFAULT_AMULET_NAME,
+): string {
+  const actionTag = getActionTag(action);
+  return actionTag !== undefined ? actionTagToTitle(amuletName)[actionTag] : getRawActionTag(action);
+}
+
 export function formatBasisPoints(value: string): string {
   if (value.length === 0) {
     return '';
@@ -111,9 +131,10 @@ export function hasSvVoted(votes: readonly ScanVote[], svPartyId: string): boole
 }
 
 export function getVoteRequestContractId(contract: ScanVoteRequestContract): string {
-  return contract.payload.trackingCid ?? contract.contract_id;
+  return getVoteRequestRouteId(contract);
 }
 
+/** Splice convention: absent deadline/effective date displays as "Threshold". */
 function formatDateTime(value: string | undefined): string {
   if (value === undefined || value.length === 0) {
     return 'Threshold';
@@ -127,10 +148,7 @@ function buildProposalDetails(
   amuletName: string = DEFAULT_AMULET_NAME,
 ): ProposalDetailsView {
   const actionTag = getActionTag(contract.payload.action);
-  const actionName =
-    actionTag !== undefined
-      ? actionTagToTitle(amuletName)[actionTag]
-      : contract.payload.action.tag;
+  const actionName = getActionName(contract.payload.action, amuletName);
 
   const base = {
     actionName,
@@ -172,9 +190,14 @@ function buildProposalDetails(
     };
   }
 
+  if (import.meta.env.DEV) {
+    console.warn(`Unsupported governance action tag: ${getRawActionTag(contract.payload.action)}`);
+  }
+
   return {
     ...base,
-    action: 'SRARC_SetConfig',
+    action: 'unsupported',
+    rawActionTag: getRawActionTag(contract.payload.action),
   };
 }
 
@@ -213,15 +236,10 @@ export function toProposalListingItem(
   amuletName: string = DEFAULT_AMULET_NAME,
 ): ProposalListingItem {
   const votes = parseVoteEntries(contract.payload.votes);
-  const actionTag = getActionTag(contract.payload.action);
-  const actionName =
-    actionTag !== undefined
-      ? actionTagToTitle(amuletName)[actionTag]
-      : contract.payload.action.tag;
 
   return {
     contractId: getVoteRequestContractId(contract),
-    actionName,
+    actionName: getActionName(contract.payload.action, amuletName),
     description: contract.payload.reason.body,
     votingThresholdDeadline: formatDateTime(contract.payload.voteBefore),
     voteTakesEffect: formatDateTime(contract.payload.targetEffectiveAt),
@@ -237,15 +255,9 @@ export function toActionRequiredItem(
   svPartyId: string,
   amuletName: string = DEFAULT_AMULET_NAME,
 ): ActionRequiredItem {
-  const actionTag = getActionTag(contract.payload.action);
-  const actionName =
-    actionTag !== undefined
-      ? actionTagToTitle(amuletName)[actionTag]
-      : contract.payload.action.tag;
-
   return {
     contractId: getVoteRequestContractId(contract),
-    actionName,
+    actionName: getActionName(contract.payload.action, amuletName),
     description: contract.payload.reason.body,
     votingCloses: formatDateTime(contract.payload.voteBefore),
     createdAt: formatDateTime(contract.created_at),

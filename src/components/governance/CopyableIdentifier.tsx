@@ -30,7 +30,7 @@ export function CopyableIdentifier({
 }: CopyableIdentifierProps) {
   const displayedValue =
     maxDisplayLength !== undefined && value.length > maxDisplayLength
-      ? value.slice(0, maxDisplayLength)
+      ? `${value.slice(0, maxDisplayLength)}…`
       : value;
 
   return (

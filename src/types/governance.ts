@@ -112,6 +112,12 @@ export type ProposalDetailsView = {
       readonly action: 'SRARC_OffboardSv' | 'SRARC_RevokeFeaturedAppRight' | 'SRARC_SetConfig' | 'CRARC_SetConfig' | 'SRARC_CreateUnallocatedUnclaimedActivityRecord';
       readonly proposal?: undefined;
     }
+  | {
+      /** Action not yet mapped in the detail view — see `rawActionTag`. */
+      readonly action: 'unsupported';
+      readonly rawActionTag: string;
+      readonly proposal?: undefined;
+    }
 );
 
 /** Full detail payload for `ProposalDetailsContent`. */
