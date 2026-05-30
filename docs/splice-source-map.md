@@ -8,8 +8,8 @@ Governance UI lives in `apps/sv/frontend/`. Route: `/governance` (`src/routes/go
 
 | Priority | This repo | Splice path | Notes |
 | --- | --- | --- | --- |
-| 1 | `src/routes/VoteList.tsx`, `src/hooks/useVotes.ts` | `components/governance/ProposalListingSection.tsx`, `hooks/useListVoteRequests.tsx` | Done — mock listings |
-| 2 | `src/routes/VoteDetail.tsx` | `components/governance/ProposalDetailsContent.tsx`, `routes/voteRequestDetails.tsx` | Done — mock detail by contractId |
+| 1 | `src/routes/VoteList.tsx`, `src/components/votes/ListVoteRequests.tsx` | `apps/common/frontend/src/components/votes/ListVoteRequests.tsx` | Done — tabbed Vote Requests UX |
+| 2 | `src/routes/VoteDetail.tsx` | `VoteModalContent` + `VoteRequestModalView` | Done — deep link matches modal |
 | 3 | `src/components/governance/ProposalVoteForm.tsx` | `components/governance/ProposalVoteForm.tsx` | Done — shell wired to `useCastVote` |
 | 4 | `src/routes/VoteList.tsx` | `components/governance/ActionRequiredSection.tsx` | Done — items with `yourVote: no-vote` |
 | — | `src/types/governance.ts` | `utils/types.ts` | `ProposalListingData`, `ProposalVote`, `CastVoteArgs` shapes |
@@ -28,10 +28,10 @@ M2.3 extracted the **governance dashboard** table (`ProposalListingSection` from
 | Splice dark theme | `apps/common/frontend/src/theme/` | Done |
 | Config diff accordion | `PrettyJsonDiff` + `JsonDiffAccordion` in modal `ActionView` | Done — `SRARC_SetConfig` |
 | DataGrid rows (Tracking Id, Requester, dates) | `apps/common/frontend/src/components/votes/VoteRequestFilterTable.tsx` | Done — `@mui/x-data-grid` |
-| Detail modal | `apps/common/frontend/src/components/votes/VoteModalContent.tsx` + `VoteForm.tsx` | Done — Splice layout; config diff accordion deferred |
+| Detail modal | `apps/common/frontend/src/components/votes/VoteModalContent.tsx` + `VoteForm.tsx` | Done — Splice layout + config diff accordion |
 | Legacy vote route | `apps/sv/frontend/src/components/votes/VoteRequest.tsx` | Wrapper around `ListVoteRequests` |
 
-**Plan:** keep the M2.4 Scan data layer (`scan-client`, `governance-transform`, hooks); swap `VoteList` / `VoteDetail` presentation to lifted `ListVoteRequests` + modal stack, wired to our hooks instead of `useVotesHooks()`.
+The M2.4 Scan data layer (`scan-client`, `governance-transform`, hooks) feeds the lifted `ListVoteRequests` + modal stack on `/votes`.
 
 ## Legacy (pre-overhaul) paths
 

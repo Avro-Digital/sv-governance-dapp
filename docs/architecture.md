@@ -4,7 +4,7 @@ Canonical upstream: [canton-network/splice](https://github.com/canton-network/sp
 
 ## Status
 
-Initial scaffold — decisions logged as Milestone 2+ work lands.
+M2 read path and Vote Requests UI parity landed on `main` (Scan data layer + Splice `ListVoteRequests` extraction). External signing (`ExternalSigner`, wallet connect) remains in progress.
 
 ## Data and signing paths
 
@@ -13,7 +13,7 @@ The Splice SV operator app does **not** use `@canton-network/dapp-sdk`. Governan
 | Layer | Splice (today) | This dApp (target) |
 | --- | --- | --- |
 | UI | `components/governance/*`, route `/governance` | Extracted components under `src/components/` |
-| Vote list | `useListDsoRulesVoteRequests` → SV Admin OpenAPI | `useVotes` → Scan API (`VITE_SCAN_URL`) |
+| Vote list | `useListDsoRulesVoteRequests` → SV Admin OpenAPI | `useGovernanceSnapshot` / `useGovernanceVoteRequests` → Scan API (`VITE_SCAN_URL`) |
 | Cast vote | `SvAdminClient.castVote` (server-side, OIDC) | `ExternalSigner` → `@canton-network/dapp-sdk` `prepareExecute` |
 | Types | `@daml.js/splice-dso-governance` | `src/types/governance.ts` (scaffold; DAML.js later) |
 | Auth | `react-oidc-context` | `VITE_SV_PARTY_ID` (M2.4); wallet session via CIP-103 (M2.5+) |
@@ -46,7 +46,7 @@ Read path uses the **Scan API** (`VITE_SCAN_URL`), not SV Admin OpenAPI:
 - List endpoint: `GET /v0/admin/sv/voterequests` (same as Splice Scan; verified 200 on localnet without auth gate).
 - Lookup: `GET /v0/voterequests/{contract_id}` — accepts ledger contract IDs only; route IDs may use `trackingCid` (see `resolveVoteRequest` in `scan-client.ts`).
 
-`VITE_SV_PARTY_ID` identifies which SV’s vote to highlight until wallet connect (AVR-2476) replaces it.
+`VITE_SV_PARTY_ID` identifies which SV’s vote to highlight until wallet connect ([AVR-2476](https://linear.app/avro-digital/issue/AVR-2476)) replaces it.
 
 Implementation: `src/lib/scan-client.ts`, `src/lib/governance-transform.ts`, hooks under `src/hooks/`.
 
@@ -54,12 +54,10 @@ Implementation: `src/lib/scan-client.ts`, `src/lib/governance-transform.ts`, hoo
 
 Splice’s explicit ask is **lift-and-shift** of the existing SV operator UI — layout, interaction, and visual tokens — not a redesign. That UI has been through community UX review.
 
-| Aspect | Splice source | This dApp (target) |
+| Aspect | Splice source | This dApp |
 | --- | --- | --- |
-| Theme | `apps/common/frontend/src/theme/` (`mode: 'dark'`, Inter/Termina, component overrides) | Port into `src/theme/` — **required for parity**, not optional |
+| Theme | `apps/common/frontend/src/theme/` (`mode: 'dark'`, Inter, component overrides) | `src/theme/` — ported ([AVR-2481](https://linear.app/avro-digital/issue/AVR-2481)) |
 | Vote Requests page | `CreateVoteRequest` + `SvListVoteRequests` stacked | See scope boundary below |
-
-The interim light MUI scaffold in `src/theme/index.ts` predates this requirement and should be replaced with the Splice theme extraction (tracked under [AVR-2481](https://linear.app/avro-digital/issue/AVR-2481)).
 
 ## Vote Requests page — scope boundary
 
@@ -74,9 +72,9 @@ This dApp’s `/votes` route currently implements **(2) only**. That is intentio
 
 **Executed / Rejected tabs:** Splice groups `VRO_Expired` outcomes under the **Rejected** tab (same as here). Operators should expect expired proposals in that tab even though the label reads “Rejected” — not a data bug.
 
-**Fonts:** Inter is loaded from Google Fonts CDN in `index.html` (Splice parity). Self-hosting via `@fontsource` is a future hardening item for supply-chain / offline availability.
+**Fonts:** Inter is bundled via `@fontsource/inter` (weights 400/500/700) — no third-party CDN at runtime.
 
 ## Planned topics
 
-- Mapping `CastVoteArgs` → DAML `VoteRequest` choice exercise commands
+- Mapping `CastVoteArgs` → DAML `VoteRequest` choice exercise commands ([AVR-2478](https://linear.app/avro-digital/issue/AVR-2478))
 - Splice UI extraction boundaries (see `docs/splice-source-map.md`)
