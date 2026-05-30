@@ -15,3 +15,4 @@ Record each UI or logic extraction from the [Splice SV operator app](https://git
 | 2026-05-28 | `apps/sv/frontend/src/components/governance/ConfigValuesChanges.tsx` | `8048815509402e52fc218ce43a7707412d648b56` | `src/components/governance/ConfigValuesChanges.tsx` | No PartyId component |
 | 2026-05-28 | `apps/sv/frontend/src/components/beta/CopyableUrl.tsx` | `8048815509402e52fc218ce43a7707412d648b56` | `src/components/governance/CopyableUrl.tsx` | |
 | 2026-05-28 | `apps/sv/frontend/src/components/beta/MemberIdentifier.tsx` | `8048815509402e52fc218ce43a7707412d648b56` | `src/components/governance/MemberIdentifier.tsx` | |
+| 2026-05-30 | Scan API vote reads (new, not lifted) | localnet fixture | `src/lib/scan-client.ts`, `governance-transform.ts`, hooks | M2.4 — data layer; UI pivot to `ListVoteRequests` tracked in AVR-2481 |

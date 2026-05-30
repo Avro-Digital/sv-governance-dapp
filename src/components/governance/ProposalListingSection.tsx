@@ -51,13 +51,56 @@ function TableBodyTypography({ children }: PropsWithChildren) {
   return <Typography {...tableBodyTypography}>{children}</Typography>;
 }
 
-function getColumnsCount(...shown: (boolean | undefined)[]): number {
-  return 4 + shown.filter(Boolean).length;
+function getGridTemplate(
+  showThresholdDeadline?: boolean,
+  showStatus?: boolean,
+  showVoteStats?: boolean,
+): string {
+  const columns = [
+    'minmax(180px, 1.5fr)',
+    'minmax(160px, 1.1fr)',
+  ];
+
+  if (showThresholdDeadline === true) {
+    columns.push('minmax(140px, 0.95fr)');
+  }
+  columns.push('minmax(130px, 0.9fr)');
+  if (showStatus === true) {
+    columns.push('minmax(100px, 0.65fr)');
+  }
+  if (showVoteStats === true) {
+    columns.push('minmax(110px, 0.75fr)');
+  }
+  columns.push('minmax(100px, 0.65fr)');
+
+  return columns.join(' ');
 }
 
-function getGridTemplate(columnsCount: number): string {
-  return `minmax(0, 1fr) minmax(0, 0.7fr) ${'1fr '.repeat(columnsCount - 2).trim()}`;
-}
+const gridRowSx = {
+  display: 'grid',
+  alignItems: 'center',
+  columnGap: 2,
+  px: 1,
+} as const;
+
+const headCellSx = {
+  border: 0,
+  minWidth: 0,
+  py: 1.5,
+  fontWeight: 700,
+  fontSize: 12,
+  letterSpacing: '0.04em',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+} as const;
+
+const bodyCellSx = {
+  border: 0,
+  minWidth: 0,
+  py: 0,
+  overflow: 'hidden',
+} as const;
 
 interface InfoBoxProps {
   readonly info: string;
@@ -129,9 +172,8 @@ const VoteRow = memo(function VoteRow(props: VoteRowProps) {
         void navigate(`/votes/${encodeURIComponent(contractId)}`);
       }}
       sx={{
-        display: 'grid',
+        ...gridRowSx,
         gridTemplateColumns: gridTemplate,
-        alignItems: 'center',
         borderRadius: 1,
         border: 1,
         borderColor: 'divider',
@@ -141,7 +183,7 @@ const VoteRow = memo(function VoteRow(props: VoteRowProps) {
       }}
       data-testid={`${uniqueId}-row`}
     >
-      <TableCell data-testid={`${uniqueId}-row-action-name`} sx={{ overflow: 'hidden', border: 0 }}>
+      <TableCell data-testid={`${uniqueId}-row-action-name`} sx={bodyCellSx}>
         <Typography
           {...tableBodyTypography}
           sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
@@ -166,28 +208,29 @@ const VoteRow = memo(function VoteRow(props: VoteRowProps) {
           </Typography>
         )}
       </TableCell>
-      <TableCell data-testid={`${uniqueId}-row-contract-id`} sx={{ border: 0 }}>
+      <TableCell data-testid={`${uniqueId}-row-contract-id`} sx={bodyCellSx}>
         <CopyableIdentifier
           value={contractId}
+          maxDisplayLength={16}
           size="small"
           data-testid={`${uniqueId}-row-contract-id-value`}
         />
       </TableCell>
       {showThresholdDeadline === true && (
-        <TableCell data-testid={`${uniqueId}-row-voting-threshold-deadline`} sx={{ border: 0 }}>
+        <TableCell data-testid={`${uniqueId}-row-voting-threshold-deadline`} sx={bodyCellSx}>
           <TableBodyTypography>{votingThresholdDeadline}</TableBodyTypography>
         </TableCell>
       )}
-      <TableCell data-testid={`${uniqueId}-row-vote-takes-effect`} sx={{ border: 0 }}>
+      <TableCell data-testid={`${uniqueId}-row-vote-takes-effect`} sx={bodyCellSx}>
         <TableBodyTypography>{voteTakesEffect}</TableBodyTypography>
       </TableCell>
       {showStatus === true && (
-        <TableCell data-testid={`${uniqueId}-row-status`} sx={{ border: 0 }}>
+        <TableCell data-testid={`${uniqueId}-row-status`} sx={bodyCellSx}>
           <TableBodyTypography>{status}</TableBodyTypography>
         </TableCell>
       )}
       {showVoteStats === true && (
-        <TableCell data-testid={`${uniqueId}-row-all-votes`} sx={{ border: 0 }}>
+        <TableCell data-testid={`${uniqueId}-row-all-votes`} sx={bodyCellSx}>
           <Stack>
             <VoteStats
               vote="accepted"
@@ -204,7 +247,7 @@ const VoteRow = memo(function VoteRow(props: VoteRowProps) {
           </Stack>
         </TableCell>
       )}
-      <TableCell data-testid={`${uniqueId}-row-your-vote`} sx={{ border: 0 }}>
+      <TableCell data-testid={`${uniqueId}-row-your-vote`} sx={bodyCellSx}>
         <VoteStats
           vote={yourVote}
           typography={tableBodyTypography}
@@ -242,8 +285,7 @@ export function ProposalListingSection(props: ProposalListingSectionProps) {
 
   const sortedData = useMemo(() => sortProposals(data, sortOrder), [data, sortOrder]);
 
-  const columnsCount = getColumnsCount(showThresholdDeadline, showStatus, showVoteStats);
-  const gridTemplate = getGridTemplate(columnsCount);
+  const gridTemplate = getGridTemplate(showThresholdDeadline, showStatus, showVoteStats);
   const supportsInfiniteScroll = fetchNextPage !== undefined;
 
   return (
@@ -254,23 +296,19 @@ export function ProposalListingSection(props: ProposalListingSectionProps) {
         <InfoBox info={noDataMessage} data-testid={`${uniqueId}-section-info`} />
       ) : (
         <>
-          <TableContainer data-testid={`${uniqueId}-section-table`}>
-            <Table>
+          <TableContainer sx={{ overflowX: 'auto' }} data-testid={`${uniqueId}-section-table`}>
+            <Table sx={{ minWidth: 960 }}>
               <TableHead>
-                <TableRow sx={{ display: 'grid', gridTemplateColumns: gridTemplate }}>
-                  <TableCell sx={{ border: 0, fontWeight: 'bold' }}>ACTION</TableCell>
-                  <TableCell sx={{ border: 0, fontWeight: 'bold' }}>VOTE PROPOSAL CONTRACT ID</TableCell>
+                <TableRow sx={{ ...gridRowSx, gridTemplateColumns: gridTemplate, mb: 1 }}>
+                  <TableCell sx={headCellSx}>ACTION</TableCell>
+                  <TableCell sx={headCellSx}>CONTRACT ID</TableCell>
                   {showThresholdDeadline === true && (
-                    <TableCell sx={{ border: 0, fontWeight: 'bold' }}>THRESHOLD DEADLINE</TableCell>
+                    <TableCell sx={headCellSx}>THRESHOLD DEADLINE</TableCell>
                   )}
-                  <TableCell sx={{ border: 0, fontWeight: 'bold' }}>EFFECTIVE AT</TableCell>
-                  {showStatus === true && (
-                    <TableCell sx={{ border: 0, fontWeight: 'bold' }}>STATUS</TableCell>
-                  )}
-                  {showVoteStats === true && (
-                    <TableCell sx={{ border: 0, fontWeight: 'bold' }}>VOTES</TableCell>
-                  )}
-                  <TableCell sx={{ border: 0, fontWeight: 'bold' }}>YOUR VOTE</TableCell>
+                  <TableCell sx={headCellSx}>EFFECTIVE AT</TableCell>
+                  {showStatus === true && <TableCell sx={headCellSx}>STATUS</TableCell>}
+                  {showVoteStats === true && <TableCell sx={headCellSx}>VOTES</TableCell>}
+                  <TableCell sx={headCellSx}>YOUR VOTE</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody sx={{ display: 'contents' }}>

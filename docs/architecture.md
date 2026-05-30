@@ -13,13 +13,14 @@ The Splice SV operator app does **not** use `@canton-network/dapp-sdk`. Governan
 | Layer | Splice (today) | This dApp (target) |
 | --- | --- | --- |
 | UI | `components/governance/*`, route `/governance` | Extracted components under `src/components/` |
-| Vote list | `useListDsoRulesVoteRequests` → SV Admin OpenAPI | `useVotes` → ledger / scan (TBD) |
+| Vote list | `useListDsoRulesVoteRequests` → SV Admin OpenAPI | `useVotes` → Scan API (`VITE_SCAN_URL`) |
 | Cast vote | `SvAdminClient.castVote` (server-side, OIDC) | `ExternalSigner` → `@canton-network/dapp-sdk` `prepareExecute` |
 | Types | `@daml.js/splice-dso-governance` | `src/types/governance.ts` (scaffold; DAML.js later) |
-| Auth | `react-oidc-context` | Mock identity (`stores/identity.ts`); wallet session via CIP-103 |
+| Auth | `react-oidc-context` | `VITE_SV_PARTY_ID` (M2.4); wallet session via CIP-103 (M2.5+) |
 
 Reference interfaces:
 
+- `src/lib/scan-client.ts` — Scan OpenAPI client for governance reads
 - `src/lib/sv-admin.ts` — documents the upstream API we are replacing for vote casting
 - `src/lib/dapp-sdk.ts` — CIP-103 wrapper (`RemoteAdapter` from `VITE_WALLET_GATEWAY_URL`)
 - `src/lib/signing.ts` — prepare / sign / submit stub for Milestone 2
@@ -35,8 +36,21 @@ From `@canton-network/dapp-sdk` v1.2.0:
 
 `VITE_LEDGER_URL` and `VITE_PARTICIPANT_ID` are reserved for direct participant reads; they are not passed into `LedgerApiParams` (the SDK routes via the wallet).
 
+## Vote data source (M2.4)
+
+Read path uses the **Scan API** (`VITE_SCAN_URL`), not SV Admin OpenAPI:
+
+- External voters do not have operator OIDC credentials for SV Admin.
+- Scan exposes the same `listDsoRulesVoteRequests` / `lookupDsoRulesVoteRequest` endpoints used by the Scan frontend.
+- Localnet: `http://scan.localhost:4000/api/scan` (nginx on `SV_UI_PORT` 4000).
+- List endpoint: `GET /v0/admin/sv/voterequests` (same as Splice Scan; verified 200 on localnet without auth gate).
+- Lookup: `GET /v0/voterequests/{contract_id}` — accepts ledger contract IDs only; route IDs may use `trackingCid` (see `resolveVoteRequest` in `scan-client.ts`).
+
+`VITE_SV_PARTY_ID` identifies which SV’s vote to highlight until wallet connect (AVR-2476) replaces it.
+
+Implementation: `src/lib/scan-client.ts`, `src/lib/governance-transform.ts`, hooks under `src/hooks/`.
+
 ## Planned topics
 
-- Vote data source: SV Admin proxy vs Scan API vs direct ledger
 - Mapping `CastVoteArgs` → DAML `VoteRequest` choice exercise commands
 - Splice UI extraction boundaries (see `docs/splice-source-map.md`)

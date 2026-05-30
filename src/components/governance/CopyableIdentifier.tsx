@@ -15,6 +15,8 @@ interface CopyableIdentifierProps {
   readonly copyValue?: string;
   readonly badge?: string;
   readonly size: CopyableIdentifierSize;
+  /** Truncate visible text (full value still copied). Matches Splice `CopyableTypography` listing rows. */
+  readonly maxDisplayLength?: number;
   readonly 'data-testid': string;
 }
 
@@ -23,8 +25,14 @@ export function CopyableIdentifier({
   copyValue,
   badge,
   size,
+  maxDisplayLength,
   'data-testid': testId,
 }: CopyableIdentifierProps) {
+  const displayedValue =
+    maxDisplayLength !== undefined && value.length > maxDisplayLength
+      ? `${value.slice(0, maxDisplayLength)}…`
+      : value;
+
   return (
     <Box
       sx={{ display: 'flex', alignItems: 'center', minWidth: 0 }}
@@ -38,7 +46,7 @@ export function CopyableIdentifier({
         data-testid={`${testId}-value`}
         sx={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
       >
-        {value}
+        {displayedValue}
       </Typography>
       <IconButton
         color="secondary"
