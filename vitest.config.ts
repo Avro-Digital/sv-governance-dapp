@@ -13,6 +13,9 @@ export default mergeConfig(
       globals: true,
       setupFiles: ['./src/test/setup.ts'],
       css: true,
+      env: {
+        VITE_USE_MOCK_VOTES: 'true',
+      },
     },
     resolve: {
       alias: {

@@ -1,0 +1,46 @@
+{
+  "dso_rules_vote_requests": [
+    {
+      "template_id": "996a3b619d6b65ca7812881978c44c650cac119de78f5317d1f317658943001c:Splice.DsoRules:VoteRequest",
+      "contract_id": "00086288a0ff73a6358d49ec148945ee6d2100d4b6c04f0c5c7a7d528c1711f271ca12122067932913ecd1e45ed04496ea7b6b5ac4582967f8f174d6816d5fd75ab1e63b81",
+      "payload": {
+        "dso": "DSO::1220da5bac6c651bdfab7b30576137b864ba7a1f82cdd0f38c72e231db38b70b1be7",
+        "votes": [
+          [
+            "sv",
+            {
+              "sv": "sv::12200b234519c3471f6a93e6988514c1bf20d615b795d28dd4fa0257039a65eb1cc5",
+              "accept": true,
+              "reason": {
+                "url": "",
+                "body": "I accept, as I requested the vote."
+              },
+              "optCastAt": "2026-05-30T22:25:33.702685Z"
+            }
+          ]
+        ],
+        "voteBefore": "2026-06-06T22:25:06.439685Z",
+        "requester": "sv",
+        "reason": {
+          "url": "http://sv.localhost:4000",
+          "body": "Update for funzies"
+        },
+        "trackingCid": null,
+        "targetEffectiveAt": "2026-06-07T22:25:06.412Z",
+        "action": {
+          "tag": "ARC_DsoRules",
+          "value": {
+            "dsoAction": {
+              "tag": "SRARC_UpdateSvRewardWeight",
+              "value": {
+                "svParty": "sv::12200b234519c3471f6a93e6988514c1bf20d615b795d28dd4fa0257039a65eb1cc5",
+                "newRewardWeight": "10000"
+              }
+            }
+          }
+        }
+      },
+      "created_at": "2026-05-30T22:25:33.702685Z"
+    }
+  ]
+}
