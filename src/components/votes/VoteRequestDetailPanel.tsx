@@ -6,9 +6,7 @@ import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { ProposalDetailsContent } from '@/components/governance/ProposalDetailsContent';
-import { ProposalVoteForm } from '@/components/governance/ProposalVoteForm';
-import { toProposalDetailView } from '@/lib/governance-transform';
+import { VoteRequestModalView } from '@/components/votes/VoteRequestModalView';
 import { resolveVoteRequest } from '@/lib/scan-client';
 import type { ScanDsoInfoResponse, ScanVoteRequestContract } from '@/lib/scan-types';
 import { useIdentityStore } from '@/stores/identity';
@@ -71,24 +69,5 @@ export function VoteRequestDetailPanel({
     return <Alert severity="warning">Vote request not found.</Alert>;
   }
 
-  const detail = toProposalDetailView(contract, dsoInfo, partyId);
-
-  return (
-    <Box sx={{ px: { xs: 2, md: 4 }, pb: 4 }}>
-      <ProposalDetailsContent
-        contractId={detail.contractId}
-        proposalDetails={detail.proposalDetails}
-        votingInformation={detail.votingInformation}
-        votes={detail.votes}
-        currentSvPartyId={partyId}
-      />
-      <Box sx={{ mt: 3 }}>
-        <ProposalVoteForm
-          voteRequestContractId={detail.contractId}
-          currentSvPartyId={partyId}
-          votes={detail.votes}
-        />
-      </Box>
-    </Box>
-  );
+  return <VoteRequestModalView contract={contract} dsoInfo={dsoInfo} svPartyId={partyId} />;
 }

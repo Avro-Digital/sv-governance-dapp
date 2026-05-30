@@ -105,6 +105,11 @@ export function parseVoteEntries(
   return votes.map(([, vote]) => vote);
 }
 
+export function getSvMemberName(dsoInfo: ScanDsoInfoResponse, partyId: string): string {
+  const entry = dsoInfo.dso_rules.contract.payload.svs.find(([id]) => id === partyId);
+  return entry?.[1].name ?? '';
+}
+
 export function computeVoteStats(votes: readonly ScanVote[]): Record<YourVoteStatus, number> {
   const accepted = votes.filter((vote) => vote.accept).length;
   const rejected = votes.filter((vote) => !vote.accept).length;
