@@ -1,5 +1,9 @@
 // Part of the SV Governance dApp — Canton Foundation Development Fund grant #223
 
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/700.css';
+
 import { StrictMode } from 'react';
 
 import { createRoot } from 'react-dom/client';

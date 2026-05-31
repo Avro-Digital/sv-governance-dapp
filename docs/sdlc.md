@@ -59,16 +59,17 @@ Parent epic: [AVR-2471](https://linear.app/avro-digital/issue/AVR-2471) · Payme
 
 | Ticket | Title | Status |
 | --- | --- | --- |
-| AVR-2472 | SDLC: PR-only main | In progress |
+| AVR-2472 | SDLC: PR-only main | Done |
 | AVR-2473 | Scaffold + CI | Done |
 | AVR-2474 | Splice UI phase 1 | Done |
-| AVR-2475 | Mocknet data layer | Backlog |
+| AVR-2475 | Mocknet data layer | Done |
+| AVR-2481 | UI parity gaps | Done |
+| AVR-2484 | Docs + font housekeeping | In progress |
 | AVR-2476 | Wallet connect | Backlog |
 | AVR-2477 | ExternalSigner | Backlog |
 | AVR-2478 | DAML command mapping | Backlog |
 | AVR-2479 | E2E demo | Backlog |
 | AVR-2480 | CIP-103 notes | Backlog |
-| AVR-2481 | UI parity gaps | Backlog |
 
 ## Releases
 

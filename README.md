@@ -10,7 +10,7 @@ Standalone application for Canton Super Validators to cast governance votes via 
 
 ## Status
 
-**Work in progress** — funded by the [Canton Foundation Development Fund](https://github.com/canton-foundation/canton-dev-fund) under [grant proposal #223](https://github.com/canton-foundation/canton-dev-fund/pull/223). Current focus: [Milestone 2 — External Signing Proof of Concept](https://github.com/canton-foundation/canton-dev-fund/issues/287).
+**Work in progress** — funded by the [Canton Foundation Development Fund](https://github.com/canton-foundation/canton-dev-fund) under [grant proposal #223](https://github.com/canton-foundation/canton-dev-fund/pull/223). Current focus: [Milestone 2 — External Signing Proof of Concept](https://github.com/canton-foundation/canton-dev-fund/issues/287) — Scan reads and Vote Requests UI parity are on `main`; wallet connect and on-ledger cast vote are next.
 
 Project tracking: [Linear — SV Governance dApp Implementation](https://linear.app/avro-digital/project/sv-governance-dapp-implementation-46f8d4022e3b) · M2 epic: [AVR-2471](https://linear.app/avro-digital/issue/AVR-2471)
 
