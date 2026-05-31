@@ -43,12 +43,14 @@ Example: `feat(votes): add proposal detail header from Splice extraction`
 
 ## Pull requests
 
-**`main` is protected** — all changes land via PR with passing CI and at least one approval.
+**`develop` is the default integration branch** — open feature PRs against `develop`, not `main`. Both `develop` and `main` are protected: passing CI and at least one approval required.
 
-1. Create or pick a Linear issue (e.g. `AVR-2475`).
-2. Branch using Linear's git branch name: `eric/avr-2475-short-description`.
-3. Open PR to `main` with `Closes AVR-XXXX` in the body.
+1. Create or pick a Linear issue (e.g. `AVR-2476`).
+2. Branch from `develop` using Linear's git branch name: `eric/avr-2476-short-description`.
+3. Open PR to **`develop`** with `Closes AVR-XXXX` in the body.
 4. Ensure CI passes; request review.
+
+Promote stable milestones to `main` via a separate **`develop` → `main`** PR when ready.
 
 - Keep PRs focused and reviewable; prefer smaller extractions over large monolithic imports.
 - Link the relevant [grant milestone issue](https://github.com/canton-foundation/canton-dev-fund/issues/287) when the work maps to funded deliverables.
