@@ -48,7 +48,7 @@ pnpm typecheck  # TypeScript strict check
 
 Copy `.env.example` to `.env` and set ledger connection values before connecting to a participant.
 
-Contributing: [`CONTRIBUTING.md`](./CONTRIBUTING.md) · SDLC: [`docs/sdlc.md`](./docs/sdlc.md) (PR-only `main`, Linear-linked branches)
+Contributing: [`CONTRIBUTING.md`](./CONTRIBUTING.md) · SDLC: [`docs/sdlc.md`](./docs/sdlc.md) (PR-only `develop`/`main`, Linear-linked branches)
 
 ## Roadmap
 
