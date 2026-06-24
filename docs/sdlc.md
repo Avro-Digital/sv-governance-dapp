@@ -1,6 +1,6 @@
 # Software development lifecycle
 
-Grant: [Canton Dev Fund PR #223](https://github.com/canton-foundation/canton-dev-fund/pull/223) · Linear: [SV Governance dApp Implementation](https://linear.app/avro-digital/project/sv-governance-dapp-implementation-46f8d4022e3b)
+Grant: [Canton Dev Fund PR #223](https://github.com/canton-foundation/canton-dev-fund/pull/223) · amendment [#414](https://github.com/canton-foundation/canton-dev-fund/pull/414) · Linear: [SV Governance dApp Implementation](https://linear.app/avro-digital/project/sv-governance-dapp-implementation-46f8d4022e3b)
 
 ## Branching
 
@@ -64,23 +64,34 @@ Both protected branches require these checks on PRs:
 | Vitest | [Test](https://github.com/Avro-Digital/sv-governance-dapp/actions/workflows/test.yml) |
 | Production build | [Test](https://github.com/Avro-Digital/sv-governance-dapp/actions/workflows/test.yml) |
 
-## Milestone map (M2)
+## Milestone map
 
 Parent epic: [AVR-2471](https://linear.app/avro-digital/issue/AVR-2471) · Payment trigger: [AVR-1947](https://linear.app/avro-digital/issue/AVR-1947)
 
-| Ticket | Title | Status |
+| Grant milestone | Focus | Linear / repo |
 | --- | --- | --- |
-| AVR-2472 | SDLC: PR-only main | Done |
-| AVR-2473 | Scaffold + CI | Done |
-| AVR-2474 | Splice UI phase 1 | Done |
-| AVR-2475 | Mocknet data layer | Done |
-| AVR-2481 | UI parity gaps | Done |
-| AVR-2484 | Docs + font housekeeping | Done |
-| AVR-2476 | Wallet connect | Backlog |
-| AVR-2477 | ExternalSigner | Backlog |
-| AVR-2478 | DAML command mapping | Backlog |
-| AVR-2479 | E2E demo | Backlog |
-| AVR-2480 | CIP-103 notes | Backlog |
+| **M1** | CIP + Daml field classification, governance-voter infrastructure (Phase 1) | Upstream `splice-sv-voting-dapp` — not this repo |
+| **M2** | External signing PoC | AVR-2471 children below — **this repo** |
+| **M3** | Deployment packaging, operator binding, staging | Epic/tickets TBD in Linear |
+| **M4** | UX hardening, audit views, rollout | Epic/tickets TBD in Linear |
+
+### M2 tickets (this repo)
+
+| Ticket | Title | Status | Notes post-#414 |
+| --- | --- | --- | --- |
+| AVR-2472 | SDLC: PR-only + develop default | Done | |
+| AVR-2473 | Scaffold + CI | Done | |
+| AVR-2474 | Splice UI phase 1 | Done | |
+| AVR-2475 | Mocknet data layer | Done | |
+| AVR-2481 | UI parity gaps | Done | Absorbed grant M4 UI baseline early |
+| AVR-2484 | Docs + font housekeeping | Done | |
+| AVR-2476 | Wallet connect | Backlog | Bind **governance-voter party**, not operator |
+| AVR-2478 | DAML command mapping | Backlog | `DsoRules_CastVote` + `bindingCid`/`castBy`; blocked on M1 localnet |
+| AVR-2477 | ExternalSigner | Backlog | Depends on 2476 + 2478 |
+| AVR-2479 | E2E demo | Backlog | Governance-voter on non-SV participant |
+| AVR-2480 | CIP-103 notes | Backlog | Include binding setup + partner path |
+| *new* | Vote authority UI (`castBy` / role) | Backlog | Grant M2/M4 — create in Linear |
+| *new* | M3 deployment + binding epic | Backlog | Grant M3 — create in Linear |
 
 ## Releases
 
