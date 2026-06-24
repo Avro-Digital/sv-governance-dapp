@@ -24,11 +24,34 @@ This dApp therefore proves:
 
 Operator-path casting via `SvAdminClient.castVote` remains out of scope for this dApp.
 
-## Planned sections
+## Wallet connect (M2.5 / AVR-2476)
+
+The dApp binds the **delegated voter party** (`VoteDelegation.voterParty`) from a CIP-103 wallet session — not the SV operator OIDC identity.
+
+1. On mount, `governanceDappClient.init()` registers a `RemoteAdapter` when `VITE_WALLET_GATEWAY_URL` is set and attempts session restore.
+2. **Connect wallet** in the app bar opens the SDK wallet picker (`connect()`).
+3. `listAccounts()` returns authorized wallet parties; the primary account populates `useIdentityStore` for vote highlighting and future cast commands.
+4. **Disconnect** clears the wallet session and restores the default identity (`VITE_SV_PARTY_ID` in live mode, mock party in mock mode).
+5. Connection failures surface as `wallet_connection_failed` in the toolbar.
+
+### Environment
+
+| Variable | Purpose |
+| --- | --- |
+| `VITE_WALLET_GATEWAY_URL` | CIP-103 wallet gateway RPC URL for `RemoteAdapter` |
+| `VITE_SV_PARTY_ID` | Dev fallback party until wallet connect or M3 binding workflow |
+
+Copy `.env.example` to `.env` and point the gateway at your localnet wallet gateway (for example `http://localhost:8080/api/v1`).
+
+`@canton-network/dapp-sdk` bundles a WalletConnect adapter; this repo lists `@walletconnect/sign-client` and `@walletconnect/types` as direct dependencies so Vite can resolve them at dev time (they are optional peers upstream).
+
+Implementation: `src/lib/dapp-sdk.ts`, `src/stores/wallet-session.ts`, `src/components/wallet/WalletConnectToolbar.tsx`.
+
+## Planned cast path (M2.7+)
 
 1. Voter party + `VoteDelegation` setup (operator-administered; full binding/packaging workflow in grant M3)
 2. Transaction preparation (`prepareVoteTransaction` → DAML command builder over delegation choices)
-3. Wallet signature request (`requestSignature`)
+3. Wallet signature request (`requestSignature` via `prepareExecute`)
 4. Signed transaction submission (`submitSignedTransaction`)
 5. Reference implementation path vs partner-compatible CIP-103 path ([AVR-2480](https://linear.app/avro-digital/issue/AVR-2480))
 

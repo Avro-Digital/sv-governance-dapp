@@ -17,7 +17,7 @@ interface IdentityState {
 
 const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_VOTES !== 'false';
 
-/** Mock identity until wallet session binds the delegated voter party (AVR-2476). */
+/** Mock identity used when no wallet session is active in mock vote mode. */
 const MOCK_IDENTITY: SvIdentity = {
   partyId: MOCK_SV_PARTY,
   displayName: 'Mock Super Validator',
@@ -37,7 +37,7 @@ const INITIAL_IDENTITY = USE_MOCK_DATA ? MOCK_IDENTITY : resolveLiveIdentity();
 
 if (!USE_MOCK_DATA && INITIAL_IDENTITY.partyId.length === 0 && import.meta.env.DEV) {
   console.warn(
-    'VITE_SV_PARTY_ID is empty — vote list will treat all proposals as Action Required. Set to the VoteDelegation voterParty (or interim SV party from GET /v0/dso) until wallet connect (AVR-2476).',
+    'VITE_SV_PARTY_ID is empty — vote list will treat all proposals as Action Required. Connect a wallet or set the VoteDelegation voterParty (or interim SV party from GET /v0/dso) (AVR-2476).',
   );
 }
 
@@ -47,3 +47,11 @@ export const useIdentityStore = create<IdentityState>((set) => ({
     set({ identity });
   },
 }));
+
+export function getDefaultIdentity(): SvIdentity {
+  return USE_MOCK_DATA ? MOCK_IDENTITY : resolveLiveIdentity();
+}
+
+export function applyDefaultIdentity(): void {
+  useIdentityStore.getState().setIdentity(getDefaultIdentity());
+}

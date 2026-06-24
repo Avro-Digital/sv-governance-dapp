@@ -7,7 +7,7 @@ Grant scope: [proposal #223](https://github.com/canton-foundation/canton-dev-fun
 
 ## Status
 
-M2 read path and Vote Requests UI parity landed on `develop` (Scan data layer + Splice `ListVoteRequests` extraction). External signing for a **delegated voter party** (`ExternalSigner`, wallet connect, `VoteDelegation`-backed cast) remains in progress and depends on M1 contract infrastructure reaching localnet.
+M2 read path and Vote Requests UI parity landed on `develop`. Wallet connect for the **delegated voter party** lands in [AVR-2476](https://linear.app/avro-digital/issue/AVR-2476). External signing via `VoteDelegation`-backed cast (`ExternalSigner` command mapping) remains in progress and depends on M1 contract infrastructure reaching localnet.
 
 ## Grant milestone split
 
@@ -55,7 +55,7 @@ The Splice SV operator app does **not** use `@canton-network/dapp-sdk`. Governan
 | Vote list | `useListDsoRulesVoteRequests` → SV Admin OpenAPI | `useGovernanceSnapshot` / `useGovernanceVoteRequests` → Scan API (`VITE_SCAN_URL`) |
 | Cast vote | `SvAdminClient.castVote` (server-side, OIDC, operator path) | `ExternalSigner` → `@canton-network/dapp-sdk` `prepareExecute` via **`VoteDelegation`** (delegated `voterParty` path) |
 | Types | `@daml.js/splice-dso-governance` | `src/types/governance.ts` (scaffold; DAML.js when M1 DAR is wired) |
-| Auth | `react-oidc-context` (operator) | Wallet session for **delegated voter party** via CIP-103 ([AVR-2476](https://linear.app/avro-digital/issue/AVR-2476)); `VITE_SV_PARTY_ID` interim mock |
+| Auth | `react-oidc-context` (operator) | Wallet session for **delegated voter party** via CIP-103 ([AVR-2476](https://linear.app/avro-digital/issue/AVR-2476)); `VITE_SV_PARTY_ID` interim fallback |
 
 Reference interfaces:
 
@@ -86,7 +86,7 @@ Read path uses the **Scan API** (`VITE_SCAN_URL`), not SV Admin OpenAPI:
 - Lookup: `GET /v0/voterequests/{contract_id}` — accepts ledger contract IDs only; route IDs may use `trackingCid` (see `resolveVoteRequest` in `scan-client.ts`).
 - After M1: `VoteDelegation` contracts are DSO-observed and ingested into Scan so delegated authorization is network-visible.
 
-`VITE_SV_PARTY_ID` identifies which party’s vote to highlight until wallet connect ([AVR-2476](https://linear.app/avro-digital/issue/AVR-2476)) binds the **delegated voter party** from the wallet session.
+`VITE_SV_PARTY_ID` is a dev fallback for vote highlighting when no wallet is connected. Wallet connect ([AVR-2476](https://linear.app/avro-digital/issue/AVR-2476)) binds the **delegated voter party** (`VoteDelegation.voterParty`) from `listAccounts()`.
 
 Implementation: `src/lib/scan-client.ts`, `src/lib/governance-transform.ts`, hooks under `src/hooks/`.
 

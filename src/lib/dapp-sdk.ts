@@ -3,11 +3,13 @@
 import {
   DappSDK,
   RemoteAdapter,
+  type AccountsChangedEvent,
   type ConnectResult,
   type LedgerApiParams,
   type LedgerApiResult,
   type PrepareExecuteAndWaitResult,
   type PrepareExecuteParams,
+  type StatusEvent,
 } from '@canton-network/dapp-sdk';
 
 /** Configuration read from Vite environment variables. */
@@ -26,7 +28,11 @@ export interface GovernanceDappClient {
   init(): Promise<void>;
   connect(): Promise<ConnectResult>;
   disconnect(): Promise<void>;
+  isConnected(): Promise<ConnectResult>;
+  status(): Promise<StatusEvent>;
   listAccounts(): ReturnType<DappSDK['listAccounts']>;
+  onAccountsChanged(listener: (accounts: AccountsChangedEvent) => void): Promise<void>;
+  removeOnAccountsChanged(listener: (accounts: AccountsChangedEvent) => void): Promise<void>;
   prepareExecute(params: PrepareExecuteParams): Promise<null>;
   prepareExecuteAndWait(params: PrepareExecuteParams): Promise<PrepareExecuteAndWaitResult>;
   ledgerApi(params: LedgerApiParams): Promise<LedgerApiResult>;
@@ -52,6 +58,12 @@ function getSdk(): DappSDK {
     sdk = new DappSDK();
   }
   return sdk;
+}
+
+/** Test-only reset for module-level SDK singleton state. */
+export function resetGovernanceDappClientForTests(): void {
+  sdk = null;
+  initialized = false;
 }
 
 function buildInitOptions(config: DappClientConfig) {
@@ -94,9 +106,24 @@ export function createGovernanceDappClient(config: DappClientConfig = readEnvCon
     async disconnect(): Promise<void> {
       await getSdk().disconnect();
     },
+    async isConnected(): Promise<ConnectResult> {
+      await this.init();
+      return getSdk().isConnected();
+    },
+    async status(): Promise<StatusEvent> {
+      await this.init();
+      return getSdk().status();
+    },
     async listAccounts() {
       await this.init();
       return getSdk().listAccounts();
+    },
+    async onAccountsChanged(listener: (accounts: AccountsChangedEvent) => void): Promise<void> {
+      await this.init();
+      await getSdk().onAccountsChanged(listener);
+    },
+    async removeOnAccountsChanged(listener: (accounts: AccountsChangedEvent) => void): Promise<void> {
+      await getSdk().removeOnAccountsChanged(listener);
     },
     async prepareExecute(params: PrepareExecuteParams): Promise<null> {
       await this.init();
