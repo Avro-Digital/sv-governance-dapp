@@ -100,7 +100,7 @@ export const externalSigner: ExternalSigner = {
       const result = await governanceDappClient.prepareExecuteAndWait(
         buildVoteDelegationCastParams(args),
       );
-      return result.tx.updateId;
+      return result.tx.payload.updateId;
     } catch (error) {
       if (isUserCancelled(error)) {
         throw new SignatureRejectedError(
