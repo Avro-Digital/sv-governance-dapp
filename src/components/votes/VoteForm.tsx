@@ -25,8 +25,25 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 
 import { useCastVote } from '@/hooks/useCastVote';
+import { CastVoteContextError } from '@/lib/cast-vote-context';
 import type { ScanVote } from '@/lib/scan-types';
+import { SignatureRejectedError } from '@/lib/signing';
 import { displayLinkUrl } from '@/utils/display-url';
+
+function formatCastVoteError(error: unknown): string {
+  if (error instanceof SignatureRejectedError) {
+    return 'signature_rejected: Wallet cancelled or rejected the signature request.';
+  }
+  if (error instanceof CastVoteContextError) {
+    return error.message;
+  }
+  if (error instanceof Error) {
+    return error.message === 'not implemented'
+      ? 'External signing is not yet implemented (Milestone 2).'
+      : error.message;
+  }
+  return 'Unable to cast vote';
+}
 
 interface VoteFormProps {
   readonly vote?: ScanVote | undefined;
@@ -78,12 +95,7 @@ export function VoteForm({ vote, voteRequestCid }: VoteFormProps) {
       setConfirmDialogOpen(false);
       setIsEditing(false);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to cast vote';
-      setSubmitError(
-        message === 'not implemented'
-          ? 'External signing is not yet implemented (Milestone 2).'
-          : message,
-      );
+      setSubmitError(formatCastVoteError(error));
       setConfirmDialogOpen(false);
     }
   };
