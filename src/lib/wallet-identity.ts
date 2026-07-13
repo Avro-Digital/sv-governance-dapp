@@ -13,7 +13,7 @@ export function selectPrimaryWallet(accounts: readonly Wallet[]): Wallet | undef
   return accounts.find((account) => account.primary) ?? accounts[0];
 }
 
-/** Map a connected wallet account to the delegated voter identity used for vote highlighting. */
+/** Map a connected wallet account — does not change SV highlighting identity. */
 export function walletToSvIdentity(wallet: Wallet): SvIdentity {
   const hint = wallet.hint.trim();
 

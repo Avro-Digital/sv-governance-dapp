@@ -139,12 +139,22 @@ export interface ActionRequiredItem {
   readonly isYou?: boolean;
 }
 
-/** Arguments for casting a vote — mirrors Splice `ProposalVoteForm` / `SvAdminClient.castVote`. */
+/** Arguments for casting a vote via the VoteDelegation CIP-103 path. */
 export interface CastVoteArgs {
   readonly voteRequestContractId: string;
   readonly accepted: boolean;
   readonly reasonUrl: string;
   readonly reasonDescription: string;
+  /** `VoteDelegation` contract id — required for prepareExecute. */
+  readonly voteDelegationCid: string;
+  /** Active `DsoRules` contract id. */
+  readonly dsoRulesCid: string;
+  /** Delegating SV party recorded on `Vote.sv`. */
+  readonly svPartyId: string;
+  /** Wallet party that controls `VoteDelegation_CastVote`. */
+  readonly voterPartyId: string;
+  /** Optional DSO party for `readAs` (authorization / visibility). */
+  readonly dsoPartyId?: string;
 }
 
 /** Prepared vote transaction awaiting external signature (CIP-103 / dApp SDK path). */
@@ -153,6 +163,11 @@ export interface PreparedVoteTransaction {
   readonly accepted: boolean;
   readonly reasonUrl: string;
   readonly reasonDescription: string;
+  readonly voteDelegationCid: string;
+  readonly dsoRulesCid: string;
+  readonly svPartyId: string;
+  readonly voterPartyId: string;
+  readonly dsoPartyId?: string;
   readonly transactionHash: string;
   readonly preparedAt: string;
 }
@@ -165,4 +180,6 @@ export interface SignedVoteTransaction {
   readonly preparedTransactionHash: string;
   readonly signature: string;
   readonly signedAt: string;
+  /** Carries prepareExecute params from preparation through submit. */
+  readonly prepared: PreparedVoteTransaction;
 }

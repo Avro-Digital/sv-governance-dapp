@@ -51,7 +51,8 @@ describe('WalletSessionBootstrap', () => {
       expect(useWalletSessionStore.getState().status).toBe('connected');
     });
 
-    expect(useIdentityStore.getState().identity.partyId).toBe('restored-voter::1220dddd');
+    expect(useIdentityStore.getState().voterPartyId).toBe('restored-voter::1220dddd');
+    expect(useIdentityStore.getState().identity.partyId).toBeTruthy();
     expect(mockClient.init).toHaveBeenCalledTimes(1);
     expect(mockClient.onAccountsChanged).toHaveBeenCalledTimes(1);
   });
