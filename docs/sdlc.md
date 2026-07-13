@@ -1,6 +1,6 @@
 # Software development lifecycle
 
-Grant: [Canton Dev Fund PR #223](https://github.com/canton-foundation/canton-dev-fund/pull/223) · amendment [#414](https://github.com/canton-foundation/canton-dev-fund/pull/414) · Linear: [SV Governance dApp Implementation](https://linear.app/avro-digital/project/sv-governance-dapp-implementation-46f8d4022e3b)
+Grant: [Canton Dev Fund PR #223](https://github.com/canton-foundation/canton-dev-fund/pull/223) · amendment [#414](https://github.com/canton-foundation/canton-dev-fund/pull/414) · [proposal text](https://github.com/canton-foundation/canton-dev-fund/blob/main/proposals/2026-04-Avro-SV_Governance_dApp.md) · M1 impl: [`splice-sv-voting-dapp` #12](https://github.com/canton-network/splice-sv-voting-dapp/pull/12) · Linear: [SV Governance dApp Implementation](https://linear.app/avro-digital/project/sv-governance-dapp-implementation-46f8d4022e3b)
 
 ## Branching
 
@@ -70,14 +70,14 @@ Parent epic: [AVR-2471](https://linear.app/avro-digital/issue/AVR-2471) · Payme
 
 | Grant milestone | Focus | Linear / repo |
 | --- | --- | --- |
-| **M1** | CIP + Daml field classification, governance-voter infrastructure (Phase 1) | Upstream `splice-sv-voting-dapp` — not this repo |
+| **M1** | Separate voting identity (grant: field-classification language; **impl:** `VoteDelegation`) | Upstream [`splice-sv-voting-dapp` #12](https://github.com/canton-network/splice-sv-voting-dapp/pull/12) — not this repo |
 | **M2** | External signing PoC | AVR-2471 children below — **this repo** |
 | **M3** | Deployment packaging, operator binding, staging | Epic/tickets TBD in Linear |
 | **M4** | UX hardening, audit views, rollout | Epic/tickets TBD in Linear |
 
 ### M2 tickets (this repo)
 
-| Ticket | Title | Status | Notes post-#414 |
+| Ticket | Title | Status | Notes (post-#414 + VoteDelegation pivot) |
 | --- | --- | --- | --- |
 | AVR-2472 | SDLC: PR-only + develop default | Done | |
 | AVR-2473 | Scaffold + CI | Done | |
@@ -85,13 +85,13 @@ Parent epic: [AVR-2471](https://linear.app/avro-digital/issue/AVR-2471) · Payme
 | AVR-2475 | Mocknet data layer | Done | |
 | AVR-2481 | UI parity gaps | Done | Absorbed grant M4 UI baseline early |
 | AVR-2484 | Docs + font housekeeping | Done | |
-| AVR-2476 | Wallet connect | Backlog | Bind **governance-voter party**, not operator |
-| AVR-2478 | DAML command mapping | Backlog | `DsoRules_CastVote` + `bindingCid`/`castBy`; blocked on M1 localnet |
+| AVR-2476 | Wallet connect | In progress / PR | Bind **delegated voter party**, not SV operator |
+| AVR-2478 | DAML command mapping | Backlog | `VoteDelegation` → `DsoRules_CastVote`; blocked on M1 localnet |
 | AVR-2477 | ExternalSigner | Backlog | Depends on 2476 + 2478 |
-| AVR-2479 | E2E demo | Backlog | Governance-voter on non-SV participant |
-| AVR-2480 | CIP-103 notes | Backlog | Include binding setup + partner path |
-| *new* | Vote authority UI (`castBy` / role) | Backlog | Grant M2/M4 — create in Linear |
-| *new* | M3 deployment + binding epic | Backlog | Grant M3 — create in Linear |
+| AVR-2479 | E2E demo | Backlog | Delegated voter on non-SV participant |
+| AVR-2480 | CIP-103 notes | Backlog | Include `VoteDelegation` setup + partner path |
+| AVR-2740 | Authority / delegation UI | Backlog | Scan `VoteDelegation` + audit attribution |
+| *new* | M3 deployment + binding epic | Backlog | Grant M3 — create in Linear if missing |
 
 ## Releases
 

@@ -1,33 +1,49 @@
 # Architecture decisions
 
-Canonical upstream: [canton-network/splice](https://github.com/canton-network/splice) (`apps/sv/frontend/`). On-chain changes: [`canton-network/splice-sv-voting-dapp`](https://github.com/canton-network/splice-sv-voting-dapp).
+Canonical upstream UI: [canton-network/splice](https://github.com/canton-network/splice) (`apps/sv/frontend/`).
+On-chain / M1 work: [`canton-network/splice-sv-voting-dapp`](https://github.com/canton-network/splice-sv-voting-dapp) ([PR #12](https://github.com/canton-network/splice-sv-voting-dapp/pull/12)).
 
-Grant scope: [proposal #223](https://github.com/canton-foundation/canton-dev-fund/pull/223) · amendment [#414](https://github.com/canton-foundation/canton-dev-fund/pull/414).
+Grant scope: [proposal #223](https://github.com/canton-foundation/canton-dev-fund/pull/223) · approved text ([proposal markdown](https://github.com/canton-foundation/canton-dev-fund/blob/main/proposals/2026-04-Avro-SV_Governance_dApp.md)) · amendment [#414](https://github.com/canton-foundation/canton-dev-fund/pull/414).
 
 ## Status
 
-M2 read path and Vote Requests UI parity landed on `develop` (Scan data layer + Splice `ListVoteRequests` extraction). External signing via the **governance-voter path** (`ExternalSigner`, wallet connect, `bindingCid` / `castBy`) remains in progress and depends on M1 contract infrastructure reaching localnet.
+M2 read path and Vote Requests UI parity landed on `develop` (Scan data layer + Splice `ListVoteRequests` extraction). External signing for a **delegated voter party** (`ExternalSigner`, wallet connect, `VoteDelegation`-backed cast) remains in progress and depends on M1 contract infrastructure reaching localnet.
 
 ## Grant milestone split
 
 | Milestone | Owner | This repo |
 | --- | --- | --- |
-| **M1** — CIP + Daml: field classification, `SvGovernanceVoter` binding, optional governance-voter cast path (Phase 1, status-quo preserving) | `splice-sv-voting-dapp` / CIP | Consumes upgraded Scan + ledger shapes only |
+| **M1** — CIP + Daml: separate governance-voting identity from node ops (Phase 1, one-vote-per-SV) | `splice-sv-voting-dapp` / CIP | Consumes upgraded Scan + ledger shapes only |
 | **M2** — External signing PoC | This dApp | **Active** — wallet + cast demo |
 | **M3** — Deployment packaging, operator binding workflow, staging | This dApp + ops | Planned |
 | **M4** — UX hardening, audit views, rollout docs | This dApp | Planned |
 
-## M1 amendment (#414) — what changed
+## Grant amendment (#414) — approved intent
 
-The approved amendment expands M1 beyond action-level vote taxonomy:
+The approved proposal amendment expands M1 beyond an action-level vote allowlist. Grant text still calls for:
 
-- DSO rules and Amulet config fields are classified **operational**, **governance**, or **fixed**.
-- **Governance is the default** for unset classifiable fields — votes use the governance-voter path unless explicitly operational or fixed.
-- A governance vote process allows reclassification where permitted.
-- Phase 1 lands **template infrastructure only** — one vote per SV, current voter set, status-quo behavior preserved until activation.
-- `SvGovernanceVoter` binding + optional `bindingCid` / `castBy` on `DsoRules_CastVote` select operator vs governance-voter path; `Vote.castBy` / `castByRole` attribution metadata.
+- Separating governance voting from SV node automation while preserving **one vote per SV**
+- Configurable vote-category / field-classification language (operational / governance / fixed) with **governance as the default** for unset classifiable fields
+- Operator-administered binding between an approved governance voter and a key/wallet path
+- CIP-103-compatible external signing for a voter whose confirming participant need not be the SV node
 
-This dApp does **not** implement M1 contract work. It must align M2 cast commands and identity with the governance-voter path once M1 is on localnet.
+That remains the **funding and acceptance framing**. How M1 is realized on-ledger evolved during upstream review (next section).
+
+## M1 implementation — VoteDelegation pivot
+
+Upstream M1 ([`splice-sv-voting-dapp` PR #12](https://github.com/canton-network/splice-sv-voting-dapp/pull/12)) implements an additive, SCU-compatible foundation that **diverges from a Daml-level operational/governance/fixed split**:
+
+| Topic | Grant amendment language | Current M1 implementation |
+| --- | --- | --- |
+| On-ledger vote split | Per-field classification drives operator vs governance-voter path | **No governance/non-governance split in Daml** — all votes still use existing `DsoRules` request/cast |
+| Separate voting identity | Governance-voter / binding contracts | `VoteDelegation` template: SV (signatory) pre-authorizes a `voterParty` (observer; DSO observes for Scan) |
+| Cast / request path | Optional `bindingCid` / `castBy`-style attribution on cast | Nonconsuming `VoteDelegation` choices relay `DsoRules_RequestVote` / `DsoRules_CastVote`; optional trailing `voterParty` on `DsoRules_RequestVote` for co-authorization + audit |
+| Who-can-vote gating | Field classification + contract path | **UI-level** (and Scan audit trail); not hard-gated in Daml |
+| App config | Operator binding workflow (grant M3) | Optional `voterPartyId` on `SvAppBackendConfig` (identity externalized on the app side) |
+
+Trust model (from PR #12): UI-level enforcement is acceptable because the node operator can already change the voter party; **Scan** is the integrity/audit mechanism, not Daml-level who-can-vote guards.
+
+This dApp does **not** implement M1 contract work. M2 cast commands and identity must align with **`VoteDelegation` + wallet-held `voterParty`**, not the earlier `SvGovernanceVoter` / `bindingCid` / `castBy` sketch.
 
 ## Data and signing paths
 
@@ -37,13 +53,13 @@ The Splice SV operator app does **not** use `@canton-network/dapp-sdk`. Governan
 | --- | --- | --- |
 | UI | `components/governance/*`, route `/governance` | Extracted components under `src/components/` |
 | Vote list | `useListDsoRulesVoteRequests` → SV Admin OpenAPI | `useGovernanceSnapshot` / `useGovernanceVoteRequests` → Scan API (`VITE_SCAN_URL`) |
-| Cast vote | `SvAdminClient.castVote` (server-side, OIDC, operator path) | `ExternalSigner` → `@canton-network/dapp-sdk` `prepareExecute` on **governance-voter path** (`bindingCid`, `castBy`) |
+| Cast vote | `SvAdminClient.castVote` (server-side, OIDC, operator path) | `ExternalSigner` → `@canton-network/dapp-sdk` `prepareExecute` via **`VoteDelegation`** (delegated `voterParty` path) |
 | Types | `@daml.js/splice-dso-governance` | `src/types/governance.ts` (scaffold; DAML.js when M1 DAR is wired) |
-| Auth | `react-oidc-context` (operator) | Wallet session for **governance-voter party** via CIP-103 ([AVR-2476](https://linear.app/avro-digital/issue/AVR-2476)); `VITE_SV_PARTY_ID` interim mock |
+| Auth | `react-oidc-context` (operator) | Wallet session for **delegated voter party** via CIP-103 ([AVR-2476](https://linear.app/avro-digital/issue/AVR-2476)); `VITE_SV_PARTY_ID` interim mock |
 
 Reference interfaces:
 
-- `src/lib/scan-client.ts` — Scan OpenAPI client for governance reads
+- `src/lib/scan-client.ts` — Scan OpenAPI client for governance reads (and, once M1 lands, `VoteDelegation` visibility)
 - `src/lib/sv-admin.ts` — documents the upstream operator API we are replacing for vote casting
 - `src/lib/dapp-sdk.ts` — CIP-103 wrapper (`RemoteAdapter` from `VITE_WALLET_GATEWAY_URL`)
 - `src/lib/signing.ts` — prepare / sign / submit stub for Milestone 2
@@ -68,8 +84,9 @@ Read path uses the **Scan API** (`VITE_SCAN_URL`), not SV Admin OpenAPI:
 - Localnet: `http://scan.localhost:4000/api/scan` (nginx on `SV_UI_PORT` 4000).
 - List endpoint: `GET /v0/admin/sv/voterequests` (same as Splice Scan; verified 200 on localnet without auth gate).
 - Lookup: `GET /v0/voterequests/{contract_id}` — accepts ledger contract IDs only; route IDs may use `trackingCid` (see `resolveVoteRequest` in `scan-client.ts`).
+- After M1: `VoteDelegation` contracts are DSO-observed and ingested into Scan so delegated authorization is network-visible.
 
-`VITE_SV_PARTY_ID` identifies which SV’s vote to highlight until wallet connect ([AVR-2476](https://linear.app/avro-digital/issue/AVR-2476)) binds the **governance-voter party** from the wallet session.
+`VITE_SV_PARTY_ID` identifies which party’s vote to highlight until wallet connect ([AVR-2476](https://linear.app/avro-digital/issue/AVR-2476)) binds the **delegated voter party** from the wallet session.
 
 Implementation: `src/lib/scan-client.ts`, `src/lib/governance-transform.ts`, hooks under `src/hooks/`.
 
@@ -82,7 +99,7 @@ Splice’s explicit ask is **lift-and-shift** of the existing SV operator UI —
 | Theme | `apps/common/frontend/src/theme/` (`mode: 'dark'`, Inter, component overrides) | `src/theme/` — ported ([AVR-2481](https://linear.app/avro-digital/issue/AVR-2481)) |
 | Vote Requests page | `CreateVoteRequest` + `SvListVoteRequests` stacked | See scope boundary below |
 
-Grant M4 adds confirmation, diff, and **authority-path** audit views on top of this baseline.
+Grant M4 adds confirmation, diff, and **authority-path** audit views (direct vs delegated) on top of this baseline. Who-can-vote policy for the dApp is a **UI concern**, aligned with M1’s trust model.
 
 ## Vote Requests page — scope boundary
 
@@ -91,9 +108,9 @@ In Splice, `apps/sv/frontend/src/components/votes/VoteRequest.tsx` renders **two
 1. **`CreateVoteRequest`** — operator proposes a governance action (`SvAdminClient.createVoteRequest`, OIDC)
 2. **`SvListVoteRequests`** — enumerate open requests, open detail modal, cast/edit vote
 
-This dApp’s `/votes` route currently implements **(2) only**. That is intentional for M2: external governance **voters** discover and cast votes on existing proposals via Scan reads + wallet signing; they do not hold SV Admin credentials to create proposals.
+This dApp’s `/votes` route currently implements **(2) only**. That is intentional for M2: external **voter parties** discover and cast votes on existing proposals via Scan reads + wallet signing; they do not hold SV Admin credentials to create proposals (unless a future path exercises delegated `RequestVote`).
 
-**Workflow implication:** users accustomed to the full Splice page get list/review/vote here but must still **initiate** proposals through the SV operator app (e.g. localnet `http://sv.localhost:4000`) until a future ticket adds `CreateVoteRequest` + an operator write path. Document this in operator runbooks; do not assume `/votes` is a drop-in replacement for the entire Splice Vote Request route.
+**Workflow implication:** users accustomed to the full Splice page get list/review/vote here but must still **initiate** proposals through the SV operator app (e.g. localnet `http://sv.localhost:4000`) until a future ticket adds create-request + an appropriate write path. Document this in operator runbooks; do not assume `/votes` is a drop-in replacement for the entire Splice Vote Request route.
 
 **Executed / Rejected tabs:** Splice groups `VRO_Expired` outcomes under the **Rejected** tab (same as here). Operators should expect expired proposals in that tab even though the label reads “Rejected” — not a data bug.
 
@@ -101,7 +118,7 @@ This dApp’s `/votes` route currently implements **(2) only**. That is intentio
 
 ## Planned topics
 
-- Governance-voter `DsoRules_CastVote` command mapping with `bindingCid` / `castBy` ([AVR-2478](https://linear.app/avro-digital/issue/AVR-2478))
-- Vote authority attribution in UI (`castBy`, `castByRole`) — grant M2/M4
-- Operator governance-voter binding workflow — grant M3
+- `VoteDelegation`-backed cast command mapping ([AVR-2478](https://linear.app/avro-digital/issue/AVR-2478))
+- Authority / delegation attribution in UI (Scan `VoteDelegation` + vote audit) — grant M2/M4
+- Operator voter-party / key binding workflow — grant M3
 - Splice UI extraction boundaries (see `docs/splice-source-map.md`)
