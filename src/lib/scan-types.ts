@@ -67,6 +67,8 @@ export interface ScanDsoInfoResponse {
   readonly voting_threshold: number;
   readonly dso_rules: {
     readonly contract: {
+      /** Present on live Scan responses; optional in mock fixtures. */
+      readonly contract_id?: string;
       readonly payload: {
         readonly svs: ReadonlyArray<readonly [string, ScanSvInfo]>;
         readonly config?: Record<string, unknown>;
