@@ -25,7 +25,7 @@ const WALLET_B: Wallet = {
   primary: true,
   partyId: 'party-b::1220bbbb',
   status: 'allocated',
-  hint: 'governance-voter',
+  hint: 'delegated-voter',
   publicKey: 'pk-b',
   namespace: 'ns-b',
   networkId: 'localnet',
@@ -41,11 +41,11 @@ describe('wallet-identity', () => {
     expect(selectPrimaryWallet([WALLET_A])).toBe(WALLET_A);
   });
 
-  it('maps wallet hint to governance-voter identity', () => {
+  it('maps wallet hint to delegated voter identity', () => {
     expect(walletToSvIdentity(WALLET_B)).toEqual({
       partyId: 'party-b::1220bbbb',
-      displayName: 'governance-voter',
-      svName: 'governance-voter',
+      displayName: 'delegated-voter',
+      svName: 'delegated-voter',
     });
   });
 

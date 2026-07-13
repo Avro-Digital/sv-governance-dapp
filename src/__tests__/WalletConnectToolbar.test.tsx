@@ -32,7 +32,7 @@ describe('WalletConnectToolbar', () => {
     mockClient.isConnected.mockResolvedValue({ isConnected: false, isNetworkConnected: false });
   });
 
-  it('connects a wallet and binds the governance-voter party', async () => {
+  it('connects a wallet and binds the delegated voter party', async () => {
     mockClient.connect.mockResolvedValue({
       isConnected: true,
       isNetworkConnected: true,

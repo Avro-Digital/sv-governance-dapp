@@ -13,14 +13,14 @@ export function selectPrimaryWallet(accounts: readonly Wallet[]): Wallet | undef
   return accounts.find((account) => account.primary) ?? accounts[0];
 }
 
-/** Map a connected wallet account to the governance-voter identity used for vote highlighting. */
+/** Map a connected wallet account to the delegated voter identity used for vote highlighting. */
 export function walletToSvIdentity(wallet: Wallet): SvIdentity {
   const hint = wallet.hint.trim();
 
   return {
     partyId: wallet.partyId,
-    displayName: hint.length > 0 ? hint : 'Governance voter',
-    svName: hint.length > 0 ? hint : 'governance-voter',
+    displayName: hint.length > 0 ? hint : 'Delegated voter',
+    svName: hint.length > 0 ? hint : 'voter',
   };
 }
 
