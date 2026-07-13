@@ -4,11 +4,7 @@ import type { AccountsChangedEvent, Wallet } from '@canton-network/dapp-sdk';
 import { create } from 'zustand';
 
 import { governanceDappClient } from '@/lib/dapp-sdk';
-import {
-  formatWalletError,
-  selectPrimaryWallet,
-  walletToSvIdentity,
-} from '@/lib/wallet-identity';
+import { formatWalletError, selectPrimaryWallet } from '@/lib/wallet-identity';
 import { applyDefaultIdentity, useIdentityStore } from '@/stores/identity';
 
 export type WalletConnectionStatus =
@@ -36,7 +32,7 @@ function applyWalletAccounts(accounts: readonly Wallet[]): Pick<
   const primary = selectPrimaryWallet(accounts);
 
   if (primary === undefined) {
-    applyDefaultIdentity();
+    useIdentityStore.getState().setVoterPartyId(null);
     return {
       accounts,
       connectedPartyId: null,
@@ -45,7 +41,8 @@ function applyWalletAccounts(accounts: readonly Wallet[]): Pick<
     };
   }
 
-  useIdentityStore.getState().setIdentity(walletToSvIdentity(primary));
+  // Wallet party is VoteDelegation.voterParty; SV highlighting stays on identity.partyId.
+  useIdentityStore.getState().setVoterPartyId(primary.partyId);
 
   return {
     accounts,
@@ -59,7 +56,7 @@ function connectionFailed(reason: string | undefined): Pick<
   WalletSessionState,
   'status' | 'errorMessage' | 'connectedPartyId'
 > {
-  applyDefaultIdentity();
+  useIdentityStore.getState().setVoterPartyId(null);
 
   return {
     status: 'wallet_connection_failed',
@@ -170,6 +167,7 @@ export function resetWalletSessionStoreForTests(): void {
     accountsListener = null;
   }
 
+  applyDefaultIdentity();
   useWalletSessionStore.setState({
     status: 'idle',
     accounts: [],

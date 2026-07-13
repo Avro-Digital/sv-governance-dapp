@@ -57,9 +57,10 @@ describe('WalletConnectToolbar', () => {
     await userEvent.click(screen.getByTestId('wallet-connect-button'));
 
     await waitFor(() => {
-      expect(useIdentityStore.getState().identity.partyId).toBe('gov-voter::1220cccc');
+      expect(useIdentityStore.getState().voterPartyId).toBe('gov-voter::1220cccc');
     });
 
+    expect(useIdentityStore.getState().identity.partyId).toBe(MOCK_SV_PARTY);
     expect(screen.getByTestId('wallet-connected-party')).toHaveTextContent('gov-voter::1220cccc');
     expect(screen.getByTestId('wallet-disconnect-button')).toBeInTheDocument();
   });
@@ -81,28 +82,26 @@ describe('WalletConnectToolbar', () => {
       'User cancelled wallet picker',
     );
     expect(useIdentityStore.getState().identity.partyId).toBe(MOCK_SV_PARTY);
+    expect(useIdentityStore.getState().voterPartyId).toBeNull();
   });
 
-  it('disconnect restores the default identity', async () => {
+  it('disconnect clears the voter party without changing SV identity', async () => {
     useWalletSessionStore.setState({
       bootstrapComplete: true,
       status: 'connected',
       connectedPartyId: 'gov-voter::1220cccc',
       accounts: [],
     });
-    useIdentityStore.getState().setIdentity({
-      partyId: 'gov-voter::1220cccc',
-      displayName: 'gov-voter',
-      svName: 'gov-voter',
-    });
+    useIdentityStore.getState().setVoterPartyId('gov-voter::1220cccc');
 
     render(<WalletConnectToolbar />);
 
     await userEvent.click(screen.getByTestId('wallet-disconnect-button'));
 
     await waitFor(() => {
-      expect(useIdentityStore.getState().identity.partyId).toBe(MOCK_SV_PARTY);
+      expect(useIdentityStore.getState().voterPartyId).toBeNull();
     });
+    expect(useIdentityStore.getState().identity.partyId).toBe(MOCK_SV_PARTY);
     expect(screen.getByTestId('wallet-connect-button')).toBeInTheDocument();
   });
 });
