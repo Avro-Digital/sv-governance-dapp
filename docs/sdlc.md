@@ -85,11 +85,11 @@ Parent epic: [AVR-2471](https://linear.app/avro-digital/issue/AVR-2471) · Payme
 | AVR-2475 | Mocknet data layer | Done | |
 | AVR-2481 | UI parity gaps | Done | Absorbed grant M4 UI baseline early |
 | AVR-2484 | Docs + font housekeeping | Done | |
-| AVR-2476 | Wallet connect | In progress / PR | Bind **delegated voter party**, not SV operator |
-| AVR-2478 | DAML command mapping | Backlog | `VoteDelegation` → `DsoRules_CastVote`; blocked on M1 localnet |
-| AVR-2477 | ExternalSigner | Backlog | Depends on 2476 + 2478 |
-| AVR-2479 | E2E demo | Backlog | Delegated voter on non-SV participant |
-| AVR-2480 | CIP-103 notes | Backlog | Include `VoteDelegation` setup + partner path |
+| AVR-2476 | Wallet connect | Done | Bind **delegated voter party**, not SV operator |
+| AVR-2478 | DAML command mapping | Done (this slice) | `VoteDelegation` → `DsoRules_CastVote` |
+| AVR-2477 | ExternalSigner | Done (this slice) | `prepareExecuteAndWait` + `signature_rejected` |
+| AVR-2479 | E2E demo | Backlog | Delegated voter on non-SV participant + gateway |
+| AVR-2480 | CIP-103 notes | Done (this slice) | [`cip-103-integration-notes.md`](./cip-103-integration-notes.md) |
 | AVR-2740 | Authority / delegation UI | Backlog | Scan `VoteDelegation` + audit attribution |
 | *new* | M3 deployment + binding epic | Backlog | Grant M3 — create in Linear if missing |
 

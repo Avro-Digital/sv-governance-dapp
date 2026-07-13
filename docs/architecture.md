@@ -7,7 +7,7 @@ Grant scope: [proposal #223](https://github.com/canton-foundation/canton-dev-fun
 
 ## Status
 
-M2 read path and Vote Requests UI parity landed on `develop`. Wallet connect for the **delegated voter party** lands in [AVR-2476](https://linear.app/avro-digital/issue/AVR-2476). External signing via `VoteDelegation`-backed cast (`ExternalSigner` command mapping) remains in progress and depends on M1 contract infrastructure reaching localnet.
+M2 read path and Vote Requests UI parity landed on `develop`. Wallet connect for the **delegated voter party** landed in [AVR-2476](https://linear.app/avro-digital/issue/AVR-2476). `VoteDelegation_CastVote` command mapping and `ExternalSigner` → `prepareExecuteAndWait` land with [AVR-2478](https://linear.app/avro-digital/issue/AVR-2478) / [AVR-2477](https://linear.app/avro-digital/issue/AVR-2477). End-to-end LocalNet demo still depends on M1 DARs + CIP-103 gateway ([AVR-2479](https://linear.app/avro-digital/issue/AVR-2479)).
 
 ## Grant milestone split
 
