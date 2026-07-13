@@ -12,8 +12,25 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 import { useCastVote } from '@/hooks/useCastVote';
+import { CastVoteContextError } from '@/lib/cast-vote-context';
+import { SignatureRejectedError } from '@/lib/signing';
 import type { ProposalVote, YourVoteStatus } from '@/types/governance';
 import { isValidUrl } from '@/utils/validations';
+
+function formatCastVoteError(error: unknown): string {
+  if (error instanceof SignatureRejectedError) {
+    return 'signature_rejected: Wallet cancelled or rejected the signature request.';
+  }
+  if (error instanceof CastVoteContextError) {
+    return error.message;
+  }
+  if (error instanceof Error) {
+    return error.message === 'not implemented'
+      ? 'External signing is not yet implemented (Milestone 2).'
+      : `Something went wrong: ${error.message}`;
+  }
+  return 'Something went wrong: Unable to cast vote';
+}
 
 interface ProposalVoteFormProps {
   readonly voteRequestContractId: string;
@@ -79,14 +96,10 @@ export function ProposalVoteForm({
   }
 
   if (castVote.isError) {
-    const message =
-      castVote.error instanceof Error ? castVote.error.message : 'Unable to cast vote';
     return (
       <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }} data-testid="submission-message">
         <Alert severity="error" data-testid="vote-submission-error">
-          {message === 'not implemented'
-            ? 'External signing is not yet implemented (Milestone 2).'
-            : `Something went wrong: ${message}`}
+          {formatCastVoteError(castVote.error)}
         </Alert>
       </Box>
     );
