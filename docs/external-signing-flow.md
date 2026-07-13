@@ -50,9 +50,8 @@ Implementation: `src/lib/dapp-sdk.ts`, `src/stores/wallet-session.ts`, `src/comp
 ## Planned cast path (M2.7+)
 
 1. Voter party + `VoteDelegation` setup (operator-administered; full binding/packaging workflow in grant M3)
-2. Transaction preparation (`prepareVoteTransaction` → DAML command builder over delegation choices)
-3. Wallet signature request (`requestSignature` via `prepareExecute`)
-4. Signed transaction submission (`submitSignedTransaction`)
-5. Reference implementation path vs partner-compatible CIP-103 path ([AVR-2480](https://linear.app/avro-digital/issue/AVR-2480))
+2. Transaction preparation (`prepareVoteTransaction` → `buildVoteDelegationCastParams`)
+3. Wallet signature + submit (`prepareExecuteAndWait` via `ExternalSigner`)
+4. Reference vs partner-compatible CIP-103 notes — [`cip-103-integration-notes.md`](./cip-103-integration-notes.md) ([AVR-2480](https://linear.app/avro-digital/issue/AVR-2480))
 
-See [`src/lib/signing.ts`](../src/lib/signing.ts) for the stubbed `ExternalSigner` interface and [`docs/architecture.md`](./architecture.md) for the grant-vs-implementation split.
+See [`src/lib/signing.ts`](../src/lib/signing.ts), [`src/lib/vote-delegation-commands.ts`](../src/lib/vote-delegation-commands.ts), and [`docs/architecture.md`](./architecture.md).
