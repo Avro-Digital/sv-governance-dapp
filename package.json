@@ -35,6 +35,8 @@
     "@mui/material": "^5.16.14",
     "@mui/x-data-grid": "^6.20.4",
     "@tanstack/react-query": "^5.66.0",
+    "@walletconnect/sign-client": "^2.23.10",
+    "@walletconnect/types": "^2.23.10",
     "dayjs": "^1.11.13",
     "dompurify": "^3.4.7",
     "html-react-parser": "^6.1.2",

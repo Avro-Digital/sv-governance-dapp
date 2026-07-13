@@ -14,6 +14,8 @@ import Typography from '@mui/material/Typography';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Link as RouterLink, Navigate, Route, Routes } from 'react-router-dom';
 
+import { WalletConnectToolbar } from '@/components/wallet/WalletConnectToolbar';
+import { WalletSessionBootstrap } from '@/components/wallet/WalletSessionBootstrap';
 import { VoteDetail } from '@/routes/VoteDetail';
 import { VoteList } from '@/routes/VoteList';
 import { theme } from '@/theme';
@@ -37,12 +39,14 @@ export function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <BrowserRouter>
+          <WalletSessionBootstrap />
           <AppBar position="static">
             <Toolbar>
               <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                 SV Governance
               </Typography>
-              <Link component={RouterLink} to="/votes" color="inherit" underline="hover">
+              <WalletConnectToolbar />
+              <Link component={RouterLink} to="/votes" color="inherit" underline="hover" sx={{ ml: 2 }}>
                 Votes
               </Link>
             </Toolbar>
