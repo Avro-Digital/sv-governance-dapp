@@ -23,11 +23,12 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 import { useCreateVoteRequest } from '@/hooks/useCreateVoteRequest';
+import { buildProposalAction } from '@/lib/proposal-actions';
 import type { RequestVoteFormInput } from '@/lib/request-vote-context';
 import type { ScanDsoInfoResponse } from '@/lib/scan-types';
 import { SignatureRejectedError } from '@/lib/signing';
 import { VoteDelegationContextError } from '@/lib/vote-delegation-context';
-import type { GovernanceAction, SupportedActionTag } from '@/types/governance';
+import type { SupportedActionTag } from '@/types/governance';
 
 type ActionTag = SupportedActionTag;
 
@@ -60,14 +61,6 @@ function formatError(error: unknown): string {
     return error.message;
   }
   return error instanceof Error ? error.message : 'Failed to create vote request.';
-}
-
-function dsoAction(tag: ActionTag, value: Record<string, unknown>): GovernanceAction {
-  return { tag: 'ARC_DsoRules', value: { dsoAction: { tag, value } } };
-}
-
-function amuletAction(tag: ActionTag, value: Record<string, unknown>): GovernanceAction {
-  return { tag: 'ARC_AmuletRules', value: { amuletRulesAction: { tag, value } } };
 }
 
 interface Props {
@@ -116,37 +109,6 @@ export function CreateVoteRequestForm({ dsoInfo }: Props) {
       setConfigJson(JSON.stringify(selectedConfig, null, 2));
     }
   }, [selectedConfig]);
-
-  const buildAction = (): GovernanceAction => {
-    switch (actionTag) {
-      case 'SRARC_OffboardSv':
-        return dsoAction(actionTag, { sv: party });
-      case 'SRARC_GrantFeaturedAppRight':
-        return dsoAction(actionTag, { provider, activityWeight: null });
-      case 'SRARC_RevokeFeaturedAppRight':
-        return dsoAction(actionTag, { rightCid });
-      case 'SRARC_UpdateSvRewardWeight':
-        return dsoAction(actionTag, { svParty: party, newRewardWeight: rewardWeight });
-      case 'SRARC_CreateUnallocatedUnclaimedActivityRecord':
-        return dsoAction(actionTag, {
-          beneficiary,
-          amount,
-          reason: summary,
-          expiresAt: new Date(mustMintBefore).toISOString(),
-        });
-      case 'SRARC_SetConfig': {
-        const newConfig = JSON.parse(configJson) as Record<string, unknown>;
-        return dsoAction(actionTag, {
-          newConfig,
-          baseConfig: dsoInfo.dso_rules.contract.payload.config ?? null,
-        });
-      }
-      case 'CRARC_SetConfig': {
-        const newConfig = JSON.parse(configJson) as Record<string, unknown>;
-        return amuletAction(actionTag, { newConfig, baseConfig: selectedConfig ?? null });
-      }
-    }
-  };
 
   const validate = (): string | undefined => {
     const expiry = new Date(expiresAt);
@@ -202,7 +164,18 @@ export function CreateVoteRequestForm({ dsoInfo }: Props) {
     const expiry = new Date(expiresAt);
     setFormError(undefined);
     setPendingInput({
-      action: buildAction(),
+      action: buildProposalAction(actionTag, {
+        party,
+        provider,
+        rightCid,
+        rewardWeight,
+        beneficiary,
+        amount,
+        summary,
+        mustMintBefore,
+        configJson,
+        ...(selectedConfig !== undefined ? { baseConfig: selectedConfig } : {}),
+      }),
       reasonUrl: url.trim(),
       reasonDescription: summary.trim(),
       voteRequestTimeoutMicroseconds: String(
