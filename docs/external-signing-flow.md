@@ -19,7 +19,7 @@ On-ledger, M1 no longer introduces a separate governance/non-governance cast pat
 This dApp therefore proves:
 
 1. Wallet connect for the **delegated voter party** (confirming participant ≠ SV node)
-2. Cast via `@canton-network/dapp-sdk` `prepareExecute` exercising the **`VoteDelegation` → `DsoRules_CastVote`** path (not SV Admin OIDC)
+2. Create requests and cast via `@canton-network/dapp-sdk` `prepareExecuteAndWait`, exercising **`VoteDelegation_RequestVote` / `VoteDelegation_CastVote`** (not SV Admin OIDC)
 3. End-to-end demo on localnet once M1 Daml is available in Scan/localnet fixtures
 
 Operator-path casting via `SvAdminClient.castVote` remains out of scope for this dApp.
@@ -30,8 +30,8 @@ The dApp binds the **delegated voter party** (`VoteDelegation.voterParty`) from 
 
 1. On mount, `governanceDappClient.init()` registers a `RemoteAdapter` when `VITE_WALLET_GATEWAY_URL` is set and attempts session restore.
 2. **Connect wallet** in the app bar opens the SDK wallet picker (`connect()`).
-3. `listAccounts()` returns authorized wallet parties; the primary account populates `useIdentityStore` for vote highlighting and future cast commands.
-4. **Disconnect** clears the wallet session and restores the default identity (`VITE_SV_PARTY_ID` in live mode, mock party in mock mode).
+3. `listAccounts()` returns authorized wallet parties; the primary account populates `voterPartyId` for request/cast commands while `identity.partyId` remains the delegating SV used for highlighting.
+4. **Disconnect** clears `voterPartyId` without changing the delegating SV identity.
 5. Connection failures surface as `wallet_connection_failed` in the toolbar.
 
 ### Environment
@@ -47,11 +47,12 @@ Copy `.env.example` to `.env` and point the gateway at your localnet wallet gate
 
 Implementation: `src/lib/dapp-sdk.ts`, `src/stores/wallet-session.ts`, `src/components/wallet/WalletConnectToolbar.tsx`.
 
-## Planned cast path (M2.7+)
+## Request and cast path (M2.7+)
 
 1. Voter party + `VoteDelegation` setup (operator-administered; full binding/packaging workflow in grant M3)
-2. Transaction preparation (`prepareVoteTransaction` → `buildVoteDelegationCastParams`)
-3. Wallet signature + submit (`prepareExecuteAndWait` via `ExternalSigner`)
-4. Reference vs partner-compatible CIP-103 notes — [`cip-103-integration-notes.md`](./cip-103-integration-notes.md) ([AVR-2480](https://linear.app/avro-digital/issue/AVR-2480))
+2. Proposal creation (`buildVoteDelegationRequestParams` → `prepareExecuteAndWait`)
+3. Cast preparation (`prepareVoteTransaction` → `buildVoteDelegationCastParams`)
+4. Wallet signature + submit (`prepareExecuteAndWait` via `ExternalSigner`)
+5. Reference vs partner-compatible CIP-103 notes — [`cip-103-integration-notes.md`](./cip-103-integration-notes.md) ([AVR-2480](https://linear.app/avro-digital/issue/AVR-2480))
 
 See [`src/lib/signing.ts`](../src/lib/signing.ts), [`src/lib/vote-delegation-commands.ts`](../src/lib/vote-delegation-commands.ts), and [`docs/architecture.md`](./architecture.md).

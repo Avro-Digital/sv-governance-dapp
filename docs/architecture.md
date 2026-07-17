@@ -7,14 +7,14 @@ Grant scope: [proposal #223](https://github.com/canton-foundation/canton-dev-fun
 
 ## Status
 
-M2 read path and Vote Requests UI parity landed on `develop`. Wallet connect for the **delegated voter party** landed in [AVR-2476](https://linear.app/avro-digital/issue/AVR-2476). `VoteDelegation_CastVote` command mapping and `ExternalSigner` → `prepareExecuteAndWait` land with [AVR-2478](https://linear.app/avro-digital/issue/AVR-2478) / [AVR-2477](https://linear.app/avro-digital/issue/AVR-2477). End-to-end LocalNet demo still depends on M1 DARs + CIP-103 gateway ([AVR-2479](https://linear.app/avro-digital/issue/AVR-2479)).
+M2 read path and Vote Requests UI parity landed on `develop`. Wallet connect for the **delegated voter party** landed in [AVR-2476](https://linear.app/avro-digital/issue/AVR-2476). `VoteDelegation_RequestVote` / `VoteDelegation_CastVote` command mapping and `prepareExecuteAndWait` land with [AVR-2478](https://linear.app/avro-digital/issue/AVR-2478) / [AVR-2477](https://linear.app/avro-digital/issue/AVR-2477). End-to-end LocalNet demo still depends on M1 DARs + CIP-103 gateway ([AVR-2479](https://linear.app/avro-digital/issue/AVR-2479)).
 
 ## Grant milestone split
 
 | Milestone | Owner | This repo |
 | --- | --- | --- |
 | **M1** — CIP + Daml: separate governance-voting identity from node ops (Phase 1, one-vote-per-SV) | `splice-sv-voting-dapp` / CIP | Consumes upgraded Scan + ledger shapes only |
-| **M2** — External signing PoC | This dApp | **Active** — wallet + cast demo |
+| **M2** — External signing PoC | This dApp | **Active** — wallet + request + cast demo |
 | **M3** — Deployment packaging, operator binding workflow, staging | This dApp + ops | Planned |
 | **M4** — UX hardening, audit views, rollout docs | This dApp | Planned |
 
@@ -53,7 +53,8 @@ The Splice SV operator app does **not** use `@canton-network/dapp-sdk`. Governan
 | --- | --- | --- |
 | UI | `components/governance/*`, route `/governance` | Extracted components under `src/components/` |
 | Vote list | `useListDsoRulesVoteRequests` → SV Admin OpenAPI | `useGovernanceSnapshot` / `useGovernanceVoteRequests` → Scan API (`VITE_SCAN_URL`) |
-| Cast vote | `SvAdminClient.castVote` (server-side, OIDC, operator path) | `ExternalSigner` → `@canton-network/dapp-sdk` `prepareExecute` via **`VoteDelegation`** (delegated `voterParty` path) |
+| Create request | `SvAdminClient.createVoteRequest` (server-side, OIDC, operator path) | `@canton-network/dapp-sdk` `prepareExecuteAndWait` via **`VoteDelegation_RequestVote`** |
+| Cast vote | `SvAdminClient.castVote` (server-side, OIDC, operator path) | `ExternalSigner` → `@canton-network/dapp-sdk` `prepareExecuteAndWait` via **`VoteDelegation_CastVote`** |
 | Types | `@daml.js/splice-dso-governance` | `src/types/governance.ts` (scaffold; DAML.js when M1 DAR is wired) |
 | Auth | `react-oidc-context` (operator) | Wallet session for **delegated voter party** via CIP-103 ([AVR-2476](https://linear.app/avro-digital/issue/AVR-2476)); `VITE_SV_PARTY_ID` interim fallback |
 
@@ -108,9 +109,7 @@ In Splice, `apps/sv/frontend/src/components/votes/VoteRequest.tsx` renders **two
 1. **`CreateVoteRequest`** — operator proposes a governance action (`SvAdminClient.createVoteRequest`, OIDC)
 2. **`SvListVoteRequests`** — enumerate open requests, open detail modal, cast/edit vote
 
-This dApp’s `/votes` route currently implements **(2) only**. That is intentional for M2: external **voter parties** discover and cast votes on existing proposals via Scan reads + wallet signing; they do not hold SV Admin credentials to create proposals (unless a future path exercises delegated `RequestVote`).
-
-**Workflow implication:** users accustomed to the full Splice page get list/review/vote here but must still **initiate** proposals through the SV operator app (e.g. localnet `http://sv.localhost:4000`) until a future ticket adds create-request + an appropriate write path. Document this in operator runbooks; do not assume `/votes` is a drop-in replacement for the entire Splice Vote Request route.
+This dApp’s `/votes` route implements both surfaces. Proposal creation preserves the original seven action types and common expiry/effectivity fields, but replaces the SV Admin write with wallet-signed `VoteDelegation_RequestVote`. Review and casting continue through Scan reads and `VoteDelegation_CastVote`.
 
 **Executed / Rejected tabs:** Splice groups `VRO_Expired` outcomes under the **Rejected** tab (same as here). Operators should expect expired proposals in that tab even though the label reads “Rejected” — not a data bug.
 
