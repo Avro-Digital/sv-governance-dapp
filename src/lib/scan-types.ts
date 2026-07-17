@@ -75,6 +75,17 @@ export interface ScanDsoInfoResponse {
       };
     };
   };
+  readonly amulet_rules?: {
+    readonly contract: {
+      readonly contract_id?: string;
+      readonly payload: {
+        readonly configSchedule?: {
+          readonly initialValue: Record<string, unknown>;
+          readonly futureValues?: readonly unknown[];
+        };
+      };
+    };
+  };
 }
 
 export interface ScanVoteRequestOutcome {
