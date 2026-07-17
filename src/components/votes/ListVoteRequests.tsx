@@ -23,6 +23,7 @@ import { ProposalListingSection } from '@/components/governance/ProposalListingS
 import { useGovernanceVoteRequests } from '@/hooks/useGovernanceVoteRequests';
 import { useVoteHistoryListing } from '@/hooks/useVoteRequestResults';
 
+import { CreateVoteRequestForm } from './CreateVoteRequestForm';
 import type { VoteRequestModalState, VoteResultModalState } from './types';
 import { VoteRequestDetailPanel } from './VoteRequestDetailPanel';
 import { VoteRequestsFilterTable } from './VoteRequestsFilterTable';
@@ -104,6 +105,8 @@ export function ListVoteRequests() {
         Vote Requests
       </Typography>
 
+      <CreateVoteRequestForm dsoInfo={dsoInfo} />
+
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={tabIndex} onChange={handleTabChange} aria-label="Vote request tabs">
           <Tab
@@ -112,7 +115,11 @@ export function ListVoteRequests() {
             icon={<Badge badgeContent={actionNeeded.length} color="error" sx={{ mx: 1 }} />}
             iconPosition="end"
           />
-          <Tab label="In Progress" {...tabProps('in-progress')} data-testid="tab-panel-in-progress" />
+          <Tab
+            label="In Progress"
+            {...tabProps('in-progress')}
+            data-testid="tab-panel-in-progress"
+          />
           <Tab label="Executed" {...tabProps('executed')} />
           <Tab label="Rejected" {...tabProps('rejected')} />
         </Tabs>
@@ -178,7 +185,11 @@ export function ListVoteRequests() {
                   title="Vote Request"
                   id="vote-request-modal-title"
                   action={
-                    <IconButton id="vote-request-modal-close-button" onClick={handleClose} aria-label="Close">
+                    <IconButton
+                      id="vote-request-modal-close-button"
+                      onClick={handleClose}
+                      aria-label="Close"
+                    >
                       <CloseIcon />
                     </IconButton>
                   }
@@ -210,7 +221,11 @@ export function ListVoteRequests() {
                   title="Vote Result"
                   id="vote-result-modal-title"
                   action={
-                    <IconButton id="vote-result-modal-close-button" onClick={handleClose} aria-label="Close">
+                    <IconButton
+                      id="vote-result-modal-close-button"
+                      onClick={handleClose}
+                      aria-label="Close"
+                    >
                       <CloseIcon />
                     </IconButton>
                   }
