@@ -2,8 +2,8 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { SignatureRejectedError, externalSigner } from '@/lib/signing';
-import type { CastVoteArgs } from '@/types/governance';
+import { SignatureRejectedError, externalSigner, submitDelegatedVoteRequest } from '@/lib/signing';
+import type { CastVoteArgs, RequestVoteArgs } from '@/types/governance';
 
 const prepareExecuteAndWait = vi.fn();
 
@@ -24,6 +24,20 @@ const ARGS: CastVoteArgs = {
   voterPartyId: 'voter::1',
 };
 
+const REQUEST_ARGS: RequestVoteArgs = {
+  action: {
+    tag: 'ARC_DsoRules',
+    value: { dsoAction: { tag: 'SRARC_OffboardSv', value: { sv: 'sv::2' } } },
+  },
+  reasonUrl: 'https://example.com/proposal',
+  reasonDescription: 'Offboard inactive SV',
+  voteRequestTimeoutMicroseconds: '86400000000',
+  voteDelegationCid: 'del',
+  dsoRulesCid: 'dso',
+  svPartyId: 'sv::1',
+  voterPartyId: 'voter::1',
+};
+
 describe('externalSigner', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -31,7 +45,11 @@ describe('externalSigner', () => {
 
   it('submits VoteDelegation_CastVote via prepareExecuteAndWait', async () => {
     prepareExecuteAndWait.mockResolvedValue({
-      tx: { status: 'executed', commandId: 'c1', payload: { updateId: 'upd-1', completionOffset: 1 } },
+      tx: {
+        status: 'executed',
+        commandId: 'c1',
+        payload: { updateId: 'upd-1', completionOffset: 1 },
+      },
     });
 
     const prepared = await externalSigner.prepareVoteTransaction(ARGS);
@@ -57,5 +75,23 @@ describe('externalSigner', () => {
     await expect(externalSigner.submitSignedTransaction(signed)).rejects.toBeInstanceOf(
       SignatureRejectedError,
     );
+  });
+
+  it('submits VoteDelegation_RequestVote through the wallet', async () => {
+    prepareExecuteAndWait.mockResolvedValue({
+      tx: {
+        status: 'executed',
+        commandId: 'c2',
+        payload: { updateId: 'upd-2', completionOffset: 2 },
+      },
+    });
+
+    await expect(submitDelegatedVoteRequest(REQUEST_ARGS)).resolves.toBe('upd-2');
+    const params = prepareExecuteAndWait.mock.calls[0]![0] as {
+      commands: Array<{ ExerciseCommand: { choice: string } }>;
+      actAs: string[];
+    };
+    expect(params.commands[0]?.ExerciseCommand.choice).toBe('VoteDelegation_RequestVote');
+    expect(params.actAs).toEqual(['voter::1']);
   });
 });

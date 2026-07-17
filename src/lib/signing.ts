@@ -5,9 +5,15 @@ import { ErrorCode } from '@canton-network/dapp-sdk';
 import { governanceDappClient } from '@/lib/dapp-sdk';
 import {
   buildVoteDelegationCastParams,
+  buildVoteDelegationRequestParams,
   hashCastVoteArgs,
 } from '@/lib/vote-delegation-commands';
-import type { CastVoteArgs, PreparedVoteTransaction, SignedVoteTransaction } from '@/types/governance';
+import type {
+  CastVoteArgs,
+  PreparedVoteTransaction,
+  RequestVoteArgs,
+  SignedVoteTransaction,
+} from '@/types/governance';
 
 /**
  * External wallet signer for governance vote casting.
@@ -27,6 +33,22 @@ export class SignatureRejectedError extends Error {
   constructor(message = 'Signature rejected or cancelled in the wallet') {
     super(message);
     this.name = 'SignatureRejectedError';
+  }
+}
+
+export async function submitDelegatedVoteRequest(args: RequestVoteArgs): Promise<string> {
+  try {
+    const result = await governanceDappClient.prepareExecuteAndWait(
+      buildVoteDelegationRequestParams(args),
+    );
+    return result.tx.payload.updateId;
+  } catch (error) {
+    if (isUserCancelled(error)) {
+      throw new SignatureRejectedError(
+        error instanceof Error ? error.message : 'Signature rejected or cancelled in the wallet',
+      );
+    }
+    throw error;
   }
 }
 

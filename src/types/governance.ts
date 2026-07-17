@@ -109,7 +109,12 @@ export type ProposalDetailsView = {
       readonly proposal: FeatureAppProposal;
     }
   | {
-      readonly action: 'SRARC_OffboardSv' | 'SRARC_RevokeFeaturedAppRight' | 'SRARC_SetConfig' | 'CRARC_SetConfig' | 'SRARC_CreateUnallocatedUnclaimedActivityRecord';
+      readonly action:
+        | 'SRARC_OffboardSv'
+        | 'SRARC_RevokeFeaturedAppRight'
+        | 'SRARC_SetConfig'
+        | 'CRARC_SetConfig'
+        | 'SRARC_CreateUnallocatedUnclaimedActivityRecord';
       readonly proposal?: undefined;
     }
   | {
@@ -154,6 +159,37 @@ export interface CastVoteArgs {
   /** Wallet party that controls `VoteDelegation_CastVote`. */
   readonly voterPartyId: string;
   /** Optional DSO party for `readAs` (authorization / visibility). */
+  readonly dsoPartyId?: string;
+}
+
+/** Raw DAML action payload accepted by `DsoRules_RequestVote`. */
+export interface GovernanceAction {
+  readonly tag: 'ARC_DsoRules' | 'ARC_AmuletRules';
+  readonly value: {
+    readonly dsoAction?: {
+      readonly tag: SupportedActionTag;
+      readonly value: Record<string, unknown>;
+    };
+    readonly amuletRulesAction?: {
+      readonly tag: SupportedActionTag;
+      readonly value: Record<string, unknown>;
+    };
+  };
+}
+
+/** Arguments for creating a vote request through `VoteDelegation_RequestVote`. */
+export interface RequestVoteArgs {
+  readonly action: GovernanceAction;
+  readonly reasonUrl: string;
+  readonly reasonDescription: string;
+  /** Relative timeout in microseconds. */
+  readonly voteRequestTimeoutMicroseconds: string;
+  /** ISO timestamp, or undefined to become effective at threshold. */
+  readonly targetEffectiveAt?: string;
+  readonly voteDelegationCid: string;
+  readonly dsoRulesCid: string;
+  readonly svPartyId: string;
+  readonly voterPartyId: string;
   readonly dsoPartyId?: string;
 }
 
