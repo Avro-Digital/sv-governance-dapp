@@ -2,12 +2,13 @@
 
 import type { PrepareExecuteParams } from '@canton-network/dapp-sdk';
 
-import type { CastVoteArgs } from '@/types/governance';
+import type { CastVoteArgs, RequestVoteArgs } from '@/types/governance';
 
 const DEFAULT_PACKAGE_NAME = 'splice-dso-governance';
 const VOTE_DELEGATION_MODULE = 'Splice.DsoRules.VoteDelegation';
 const VOTE_DELEGATION_ENTITY = 'VoteDelegation';
 const CAST_VOTE_CHOICE = 'VoteDelegation_CastVote';
+const REQUEST_VOTE_CHOICE = 'VoteDelegation_RequestVote';
 
 export function getVoteDelegationTemplateId(
   packageName: string = import.meta.env.VITE_DSO_GOVERNANCE_PACKAGE_NAME?.trim() ||
@@ -41,9 +42,7 @@ export function buildVoteDelegationCastParams(args: CastVoteArgs): PrepareExecut
 
   const actAs = [args.voterPartyId];
   const readAs =
-    args.dsoPartyId !== undefined && args.dsoPartyId.length > 0
-      ? [args.dsoPartyId]
-      : undefined;
+    args.dsoPartyId !== undefined && args.dsoPartyId.length > 0 ? [args.dsoPartyId] : undefined;
 
   return {
     commands: [
@@ -57,6 +56,46 @@ export function buildVoteDelegationCastParams(args: CastVoteArgs): PrepareExecut
       },
     ],
     actAs,
+    ...(readAs !== undefined ? { readAs } : {}),
+  };
+}
+
+/**
+ * Builds CIP-103 params for delegated proposal creation:
+ * `VoteDelegation_RequestVote` → nested `DsoRules_RequestVote`.
+ */
+export function buildVoteDelegationRequestParams(args: RequestVoteArgs): PrepareExecuteParams {
+  const targetEffectiveAt = args.targetEffectiveAt ?? null;
+  const readAs =
+    args.dsoPartyId !== undefined && args.dsoPartyId.length > 0 ? [args.dsoPartyId] : undefined;
+
+  return {
+    commands: [
+      {
+        ExerciseCommand: {
+          templateId: getVoteDelegationTemplateId(),
+          contractId: args.voteDelegationCid,
+          choice: REQUEST_VOTE_CHOICE,
+          choiceArgument: {
+            dsoRulesCid: args.dsoRulesCid,
+            requestVote: {
+              requester: args.svPartyId,
+              action: args.action,
+              reason: {
+                url: args.reasonUrl,
+                body: args.reasonDescription,
+              },
+              voteRequestTimeout: {
+                microseconds: args.voteRequestTimeoutMicroseconds,
+              },
+              targetEffectiveAt,
+              voterParty: args.voterPartyId,
+            },
+          },
+        },
+      },
+    ],
+    actAs: [args.voterPartyId],
     ...(readAs !== undefined ? { readAs } : {}),
   };
 }
