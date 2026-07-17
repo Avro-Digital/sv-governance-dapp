@@ -191,7 +191,6 @@ export function CreateVoteRequestForm({ dsoInfo }: Props) {
       onSuccess: () => {
         setSummary('');
         setUrl('');
-        setExpanded(false);
         setPendingInput(undefined);
       },
     });
@@ -390,6 +389,9 @@ export function CreateVoteRequestForm({ dsoInfo }: Props) {
               >
                 {JSON.stringify(pendingInput.action, null, 2)}
               </Box>
+              {createRequest.isError && (
+                <Alert severity="error">{formatError(createRequest.error)}</Alert>
+              )}
             </Stack>
           )}
         </DialogContent>
