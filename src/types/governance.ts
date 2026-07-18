@@ -144,6 +144,16 @@ export interface ActionRequiredItem {
   readonly isYou?: boolean;
 }
 
+/**
+ * Contract disclosed explicitly with an interactive submission so the voter's
+ * participant can validate contracts it does not host (DsoRules, VoteRequest).
+ */
+export interface DisclosedContractInput {
+  readonly contractId: string;
+  readonly createdEventBlob: string;
+  readonly templateId?: string;
+}
+
 /** Arguments for casting a vote via the VoteDelegation CIP-103 path. */
 export interface CastVoteArgs {
   readonly voteRequestContractId: string;
@@ -158,8 +168,8 @@ export interface CastVoteArgs {
   readonly svPartyId: string;
   /** Wallet party that controls `VoteDelegation_CastVote`. */
   readonly voterPartyId: string;
-  /** Optional DSO party for `readAs` (authorization / visibility). */
-  readonly dsoPartyId?: string;
+  /** Contracts not hosted on the voter's participant (DsoRules, VoteRequest). */
+  readonly disclosedContracts?: readonly DisclosedContractInput[];
 }
 
 /** Raw DAML action payload accepted by `DsoRules_RequestVote`. */
@@ -190,7 +200,8 @@ export interface RequestVoteArgs {
   readonly dsoRulesCid: string;
   readonly svPartyId: string;
   readonly voterPartyId: string;
-  readonly dsoPartyId?: string;
+  /** Contracts not hosted on the voter's participant (DsoRules). */
+  readonly disclosedContracts?: readonly DisclosedContractInput[];
 }
 
 /** Prepared vote transaction awaiting external signature (CIP-103 / dApp SDK path). */
@@ -203,7 +214,7 @@ export interface PreparedVoteTransaction {
   readonly dsoRulesCid: string;
   readonly svPartyId: string;
   readonly voterPartyId: string;
-  readonly dsoPartyId?: string;
+  readonly disclosedContracts?: readonly DisclosedContractInput[];
   readonly transactionHash: string;
   readonly preparedAt: string;
 }

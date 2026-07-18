@@ -83,7 +83,9 @@ export const externalSigner: ExternalSigner = {
       dsoRulesCid: args.dsoRulesCid,
       svPartyId: args.svPartyId,
       voterPartyId: args.voterPartyId,
-      ...(args.dsoPartyId !== undefined ? { dsoPartyId: args.dsoPartyId } : {}),
+      ...(args.disclosedContracts !== undefined
+        ? { disclosedContracts: args.disclosedContracts }
+        : {}),
       transactionHash: hashCastVoteArgs(args),
       preparedAt: new Date().toISOString(),
     };
@@ -113,8 +115,8 @@ export const externalSigner: ExternalSigner = {
       dsoRulesCid: signed.prepared.dsoRulesCid,
       svPartyId: signed.prepared.svPartyId,
       voterPartyId: signed.prepared.voterPartyId,
-      ...(signed.prepared.dsoPartyId !== undefined
-        ? { dsoPartyId: signed.prepared.dsoPartyId }
+      ...(signed.prepared.disclosedContracts !== undefined
+        ? { disclosedContracts: signed.prepared.disclosedContracts }
         : {}),
     };
 

@@ -19,7 +19,10 @@ const ARGS: CastVoteArgs = {
   dsoRulesCid: 'dso-rules-cid',
   svPartyId: 'sv::1220aaaa',
   voterPartyId: 'voter::1220bbbb',
-  dsoPartyId: 'DSO::1220cccc',
+  disclosedContracts: [
+    { contractId: 'dso-rules-cid', createdEventBlob: 'blob-dso-rules', templateId: 'pkg:M:DsoRules' },
+    { contractId: 'vote-request-cid', createdEventBlob: 'blob-vote-request' },
+  ],
 };
 
 const REQUEST_ARGS: RequestVoteArgs = {
@@ -40,7 +43,7 @@ const REQUEST_ARGS: RequestVoteArgs = {
   dsoRulesCid: 'dso-rules-cid',
   svPartyId: 'sv::1220aaaa',
   voterPartyId: 'voter::1220bbbb',
-  dsoPartyId: 'DSO::1220cccc',
+  disclosedContracts: [{ contractId: 'dso-rules-cid', createdEventBlob: 'blob-dso-rules' }],
 };
 
 describe('vote-delegation-commands', () => {
@@ -70,7 +73,21 @@ describe('vote-delegation-commands', () => {
     expect(command.ExerciseCommand.choiceArgument.castVote.vote.accept).toBe(true);
     expect(command.ExerciseCommand.choiceArgument.castVote.vote.reason.body).toBe('LGTM');
     expect(params.actAs).toEqual(['voter::1220bbbb']);
-    expect(params.readAs).toEqual(['DSO::1220cccc']);
+    expect(params.readAs).toBeUndefined();
+    expect(params.disclosedContracts).toEqual([
+      {
+        contractId: 'dso-rules-cid',
+        createdEventBlob: 'blob-dso-rules',
+        templateId: 'pkg:M:DsoRules',
+      },
+      { contractId: 'vote-request-cid', createdEventBlob: 'blob-vote-request' },
+    ]);
+  });
+
+  it('omits disclosedContracts when none are provided', () => {
+    const { disclosedContracts: _ignored, ...bare } = ARGS;
+    const params = buildVoteDelegationCastParams(bare);
+    expect(params.disclosedContracts).toBeUndefined();
   });
 
   it('hashes cast args stably for a given payload', () => {
@@ -106,5 +123,8 @@ describe('vote-delegation-commands', () => {
       '2026-07-20T12:00:00.000Z',
     );
     expect(params.actAs).toEqual(['voter::1220bbbb']);
+    expect(params.disclosedContracts).toEqual([
+      { contractId: 'dso-rules-cid', createdEventBlob: 'blob-dso-rules' },
+    ]);
   });
 });

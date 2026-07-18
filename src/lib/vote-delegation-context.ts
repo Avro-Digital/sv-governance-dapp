@@ -3,14 +3,20 @@
 import { getDsoInfo } from '@/lib/scan-client';
 import type { ScanDsoInfoResponse } from '@/lib/scan-types';
 import { useIdentityStore } from '@/stores/identity';
+import type { DisclosedContractInput } from '@/types/governance';
 
 export interface VoteDelegationContext {
   readonly voteDelegationCid: string;
   readonly dsoRulesCid: string;
   readonly svPartyId: string;
   readonly voterPartyId: string;
-  readonly dsoPartyId?: string;
   readonly dsoInfo?: ScanDsoInfoResponse;
+  /**
+   * DsoRules disclosure for the voter participant, which does not host DSO
+   * contracts. Without it, prepare fails with PERMISSION_DENIED (surfaced as
+   * "A security-sensitive error has been received").
+   */
+  readonly dsoRulesDisclosed?: DisclosedContractInput;
 }
 
 export class VoteDelegationContextError extends Error {
@@ -65,13 +71,25 @@ export async function resolveVoteDelegationContext(
     );
   }
 
-  const dsoPartyId = dsoInfo?.dso_party_id?.trim();
+  const dsoRulesContract = dsoInfo?.dso_rules.contract;
+  const dsoRulesBlob = dsoRulesContract?.created_event_blob?.trim();
+  const dsoRulesDisclosed: DisclosedContractInput | undefined =
+    dsoRulesBlob !== undefined && dsoRulesBlob.length > 0
+      ? {
+          contractId: dsoRulesCid,
+          createdEventBlob: dsoRulesBlob,
+          ...(dsoRulesContract?.template_id !== undefined
+            ? { templateId: dsoRulesContract.template_id }
+            : {}),
+        }
+      : undefined;
+
   return {
     voteDelegationCid,
     dsoRulesCid,
     svPartyId: identity.partyId,
     voterPartyId,
-    ...(dsoPartyId !== undefined && dsoPartyId.length > 0 ? { dsoPartyId } : {}),
     ...(dsoInfo !== undefined ? { dsoInfo } : {}),
+    ...(dsoRulesDisclosed !== undefined ? { dsoRulesDisclosed } : {}),
   };
 }
