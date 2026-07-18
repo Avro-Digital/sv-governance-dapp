@@ -15,9 +15,19 @@ vi.mock('@/lib/scan-client', () => ({
     dso_rules: {
       contract: {
         contract_id: 'dso-rules-from-scan',
+        template_id: 'pkg:Splice.DsoRules:DsoRules',
+        created_event_blob: 'blob-dso-rules',
         payload: { svs: [] },
       },
     },
+  })),
+  listDsoRulesVoteRequests: vi.fn(async () => []),
+  resolveVoteRequest: vi.fn(async () => ({
+    template_id: 'pkg:Splice.DsoRules:VoteRequest',
+    contract_id: 'vr-current',
+    created_event_blob: 'blob-vote-request',
+    created_at: '2026-07-18T00:00:00Z',
+    payload: {},
   })),
 }));
 
@@ -54,6 +64,20 @@ describe('resolveCastVoteArgs', () => {
     expect(args.dsoRulesCid).toBe('dso-rules-from-scan');
     expect(args.svPartyId).toBe(MOCK_SV_PARTY);
     expect(args.voterPartyId).toBe('voter::1220bbbb');
-    expect(args.dsoPartyId).toBe('DSO::1220ffff');
+    // Route id "vr" resolves to the current VoteRequest contract, which
+    // changes after every cast (DsoRules_CastVote archives + recreates).
+    expect(args.voteRequestContractId).toBe('vr-current');
+    expect(args.disclosedContracts).toEqual([
+      {
+        contractId: 'dso-rules-from-scan',
+        createdEventBlob: 'blob-dso-rules',
+        templateId: 'pkg:Splice.DsoRules:DsoRules',
+      },
+      {
+        contractId: 'vr-current',
+        createdEventBlob: 'blob-vote-request',
+        templateId: 'pkg:Splice.DsoRules:VoteRequest',
+      },
+    ]);
   });
 });
