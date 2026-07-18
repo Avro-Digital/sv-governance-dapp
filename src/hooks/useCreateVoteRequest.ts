@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { refreshGovernanceData } from '@/lib/governance-refresh';
 import { resolveRequestVoteArgs, type RequestVoteFormInput } from '@/lib/request-vote-context';
 import { submitDelegatedVoteRequest } from '@/lib/signing';
 
@@ -14,7 +15,7 @@ export function useCreateVoteRequest() {
       return submitDelegatedVoteRequest(args);
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['governance'] });
+      await refreshGovernanceData(queryClient);
     },
   });
 }
