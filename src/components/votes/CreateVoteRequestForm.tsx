@@ -385,7 +385,16 @@ export function CreateVoteRequestForm({ dsoInfo }: Props) {
               </Typography>
               <Box
                 component="pre"
-                sx={{ overflow: 'auto', p: 2, bgcolor: 'grey.100', borderRadius: 1 }}
+                sx={{
+                  overflow: 'auto',
+                  p: 2,
+                  bgcolor: 'action.hover',
+                  color: 'text.primary',
+                  border: 1,
+                  borderColor: 'divider',
+                  borderRadius: 1,
+                  fontSize: '0.85rem',
+                }}
               >
                 {JSON.stringify(pendingInput.action, null, 2)}
               </Box>
