@@ -44,6 +44,8 @@ export interface ScanVoteRequestContract {
   readonly contract_id: string;
   readonly payload: ScanVoteRequestPayload;
   readonly created_at: string;
+  /** Base64 blob for explicit disclosure in interactive submissions. */
+  readonly created_event_blob?: string;
 }
 
 export interface ScanListVoteRequestsResponse {
@@ -69,6 +71,9 @@ export interface ScanDsoInfoResponse {
     readonly contract: {
       /** Present on live Scan responses; optional in mock fixtures. */
       readonly contract_id?: string;
+      readonly template_id?: string;
+      /** Base64 blob for explicit disclosure in interactive submissions. */
+      readonly created_event_blob?: string;
       readonly payload: {
         readonly svs: ReadonlyArray<readonly [string, ScanSvInfo]>;
         readonly config?: Record<string, unknown>;

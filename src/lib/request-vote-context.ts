@@ -21,6 +21,8 @@ export async function resolveRequestVoteArgs(
     dsoRulesCid: context.dsoRulesCid,
     svPartyId: context.svPartyId,
     voterPartyId: context.voterPartyId,
-    ...(context.dsoPartyId !== undefined ? { dsoPartyId: context.dsoPartyId } : {}),
+    ...(context.dsoRulesDisclosed !== undefined
+      ? { disclosedContracts: [context.dsoRulesDisclosed] }
+      : {}),
   };
 }

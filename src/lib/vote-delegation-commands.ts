@@ -2,7 +2,7 @@
 
 import type { PrepareExecuteParams } from '@canton-network/dapp-sdk';
 
-import type { CastVoteArgs, RequestVoteArgs } from '@/types/governance';
+import type { CastVoteArgs, DisclosedContractInput, RequestVoteArgs } from '@/types/governance';
 
 const DEFAULT_PACKAGE_NAME = 'splice-dso-governance';
 const VOTE_DELEGATION_MODULE = 'Splice.DsoRules.VoteDelegation';
@@ -15,6 +15,19 @@ export function getVoteDelegationTemplateId(
     DEFAULT_PACKAGE_NAME,
 ): string {
   return `#${packageName}:${VOTE_DELEGATION_MODULE}:${VOTE_DELEGATION_ENTITY}`;
+}
+
+function toSdkDisclosedContracts(
+  disclosed: readonly DisclosedContractInput[] | undefined,
+): PrepareExecuteParams['disclosedContracts'] {
+  if (disclosed === undefined || disclosed.length === 0) {
+    return undefined;
+  }
+  return disclosed.map((contract) => ({
+    contractId: contract.contractId,
+    createdEventBlob: contract.createdEventBlob,
+    ...(contract.templateId !== undefined ? { templateId: contract.templateId } : {}),
+  }));
 }
 
 /**
@@ -40,9 +53,7 @@ export function buildVoteDelegationCastParams(args: CastVoteArgs): PrepareExecut
     },
   };
 
-  const actAs = [args.voterPartyId];
-  const readAs =
-    args.dsoPartyId !== undefined && args.dsoPartyId.length > 0 ? [args.dsoPartyId] : undefined;
+  const disclosedContracts = toSdkDisclosedContracts(args.disclosedContracts);
 
   return {
     commands: [
@@ -55,8 +66,8 @@ export function buildVoteDelegationCastParams(args: CastVoteArgs): PrepareExecut
         },
       },
     ],
-    actAs,
-    ...(readAs !== undefined ? { readAs } : {}),
+    actAs: [args.voterPartyId],
+    ...(disclosedContracts !== undefined ? { disclosedContracts } : {}),
   };
 }
 
@@ -66,8 +77,7 @@ export function buildVoteDelegationCastParams(args: CastVoteArgs): PrepareExecut
  */
 export function buildVoteDelegationRequestParams(args: RequestVoteArgs): PrepareExecuteParams {
   const targetEffectiveAt = args.targetEffectiveAt ?? null;
-  const readAs =
-    args.dsoPartyId !== undefined && args.dsoPartyId.length > 0 ? [args.dsoPartyId] : undefined;
+  const disclosedContracts = toSdkDisclosedContracts(args.disclosedContracts);
 
   return {
     commands: [
@@ -96,7 +106,7 @@ export function buildVoteDelegationRequestParams(args: RequestVoteArgs): Prepare
       },
     ],
     actAs: [args.voterPartyId],
-    ...(readAs !== undefined ? { readAs } : {}),
+    ...(disclosedContracts !== undefined ? { disclosedContracts } : {}),
   };
 }
 
