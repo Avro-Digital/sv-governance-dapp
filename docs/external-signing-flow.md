@@ -20,9 +20,18 @@ This dApp therefore proves:
 
 1. Wallet connect for the **delegated voter party** (confirming participant ≠ SV node)
 2. Create requests and cast via `@canton-network/dapp-sdk` `prepareExecuteAndWait`, exercising **`VoteDelegation_RequestVote` / `VoteDelegation_CastVote`** (not SV Admin OIDC)
-3. End-to-end demo on localnet once M1 Daml is available in Scan/localnet fixtures
+3. End-to-end demo on LocalNet with the M1 `VoteDelegation` DAR
 
 Operator-path casting via `SvAdminClient.castVote` remains out of scope for this dApp.
+
+## Reproducing the M2 demo
+
+The committee-reproducible demo procedure lives in [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md) (LocalNet build, `VoteDelegation` creation, wallet gateway setup, request seeding, dApp configuration) with recording narration in [`DEMO_SCRIPT.md`](./DEMO_SCRIPT.md). The full flow — externally signed proposal creation and vote casting recorded on-chain, with the voter party confirmed through the app-user participant rather than the SV node — was verified on LocalNet on 2026-07-18.
+
+Two implementation details a reviewer should know:
+
+- Splice submissions from the voter's participant carry `DsoRules` (and for casts, the `VoteRequest`) as **explicitly disclosed contracts** sourced from Scan's `created_event_blob`, since that participant does not host DSO contracts.
+- `DsoRules_CastVote` archives and recreates the `VoteRequest`; the dApp re-resolves the current contract id through Scan before every cast.
 
 ## Wallet connect (M2.5 / AVR-2476)
 
@@ -41,7 +50,7 @@ The dApp binds the **delegated voter party** (`VoteDelegation.voterParty`) from 
 | `VITE_WALLET_GATEWAY_URL` | CIP-103 wallet gateway RPC URL for `RemoteAdapter` |
 | `VITE_SV_PARTY_ID` | Dev fallback party until wallet connect or M3 binding workflow |
 
-Copy `.env.example` to `.env` and point the gateway at your localnet wallet gateway (for example `http://localhost:8080/api/v1`).
+Copy `.env.example` to `.env` and point the gateway at your LocalNet wallet gateway. The reference gateway is `@canton-network/wallet-gateway-remote` ([canton-network/wallet](https://github.com/canton-network/wallet)), which serves the CIP-103 dApp RPC at `http://localhost:3030/api/v0/dapp` — see [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md) §0.4 for setup.
 
 `@canton-network/dapp-sdk` bundles a WalletConnect adapter; this repo lists `@walletconnect/sign-client` and `@walletconnect/types` as direct dependencies so Vite can resolve them at dev time (they are optional peers upstream).
 
