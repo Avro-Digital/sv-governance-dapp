@@ -2,9 +2,31 @@
 
 import type { GovernanceAction, SupportedActionTag } from '@/types/governance';
 
+/** Mirrors Splice `createProposalActions` (`utils/governance.ts`, July 2026 redesign). */
+export const createProposalActions: readonly {
+  readonly name: string;
+  readonly value: SupportedActionTag;
+}[] = [
+  { name: 'Offboard Member', value: 'SRARC_OffboardSv' },
+  { name: 'Feature Application', value: 'SRARC_GrantFeaturedAppRight' },
+  { name: 'Unfeature Application', value: 'SRARC_RevokeFeaturedAppRight' },
+  {
+    name: 'Set Decentralized Synchronizer Operations (DSO) Rules Configuration',
+    value: 'SRARC_SetConfig',
+  },
+  {
+    name: 'Create Unclaimed Activity Record',
+    value: 'SRARC_CreateUnallocatedUnclaimedActivityRecord',
+  },
+  { name: 'Set Amulet Rules Configuration', value: 'CRARC_SetConfig' },
+  { name: 'Update Super Validator Reward Weight', value: 'SRARC_UpdateSvRewardWeight' },
+];
+
 export interface ProposalActionFields {
   readonly party: string;
   readonly provider: string;
+  /** Optional featured-app activity weight; empty string maps to DAML `None`. */
+  readonly activityWeight?: string;
   readonly rightCid: string;
   readonly rewardWeight: string;
   readonly beneficiary: string;
@@ -27,7 +49,13 @@ export function buildProposalAction(
     case 'SRARC_OffboardSv':
       return dsoAction(tag, { sv: fields.party });
     case 'SRARC_GrantFeaturedAppRight':
-      return dsoAction(tag, { provider: fields.provider, activityWeight: null });
+      return dsoAction(tag, {
+        provider: fields.provider,
+        activityWeight:
+          fields.activityWeight === undefined || fields.activityWeight.trim().length === 0
+            ? null
+            : fields.activityWeight.trim(),
+      });
     case 'SRARC_RevokeFeaturedAppRight':
       return dsoAction(tag, { rightCid: fields.rightCid });
     case 'SRARC_UpdateSvRewardWeight':
