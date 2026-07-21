@@ -35,6 +35,7 @@ export function ActionRequiredSection({ actionRequiredRequests }: ActionRequired
       <PageSectionHeader
         title="Action Required"
         badgeCount={sortedRequests.length}
+        badgeColor="warning"
         data-testid="action-required"
       />
 
@@ -58,7 +59,7 @@ function ActionCard({ item }: { readonly item: ActionRequiredItem }) {
 
   return (
     <RouterLink
-      to={`/votes/${encodeURIComponent(item.contractId)}`}
+      to={`/governance/proposals/${encodeURIComponent(item.contractId)}`}
       style={{ textDecoration: 'none', color: 'inherit' }}
       data-testid="action-required-card-link"
     >

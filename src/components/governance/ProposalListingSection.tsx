@@ -32,6 +32,7 @@ interface ProposalListingSectionProps {
   readonly data: readonly ProposalListingItem[];
   readonly noDataMessage: string;
   readonly uniqueId: string;
+  readonly badgeCount?: number;
   readonly showThresholdDeadline?: boolean;
   readonly showVoteStats?: boolean;
   readonly showStatus?: boolean;
@@ -169,7 +170,7 @@ const VoteRow = memo(function VoteRow(props: VoteRowProps) {
   return (
     <TableRow
       onClick={() => {
-        void navigate(`/votes/${encodeURIComponent(contractId)}`);
+        void navigate(`/governance/proposals/${encodeURIComponent(contractId)}`);
       }}
       sx={{
         ...gridRowSx,
@@ -208,10 +209,12 @@ const VoteRow = memo(function VoteRow(props: VoteRowProps) {
           </Typography>
         )}
       </TableCell>
-      <TableCell data-testid={`${uniqueId}-row-contract-id`} sx={bodyCellSx}>
+      <TableCell
+        data-testid={`${uniqueId}-row-contract-id`}
+        sx={{ ...bodyCellSx, minWidth: 0, overflow: 'visible' }}
+      >
         <CopyableIdentifier
           value={contractId}
-          maxDisplayLength={16}
           size="small"
           data-testid={`${uniqueId}-row-contract-id-value`}
         />
@@ -264,6 +267,7 @@ export function ProposalListingSection(props: ProposalListingSectionProps) {
     data,
     noDataMessage,
     uniqueId,
+    badgeCount,
     showThresholdDeadline,
     showVoteStats,
     showStatus,
@@ -290,7 +294,11 @@ export function ProposalListingSection(props: ProposalListingSectionProps) {
 
   return (
     <Box ref={sectionRef} sx={{ mb: 6 }} data-testid={`${uniqueId}-section`}>
-      <PageSectionHeader title={sectionTitle} data-testid={`${uniqueId}-section`} />
+      <PageSectionHeader
+        title={sectionTitle}
+        {...(badgeCount !== undefined ? { badgeCount } : {})}
+        data-testid={`${uniqueId}-section`}
+      />
 
       {sortedData.length === 0 && hasNextPage !== true ? (
         <InfoBox info={noDataMessage} data-testid={`${uniqueId}-section-info`} />
