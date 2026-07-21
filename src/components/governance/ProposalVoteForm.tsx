@@ -2,7 +2,7 @@
 // Adapted from apps/sv/frontend/src/components/governance/ProposalVoteForm.tsx
 // at commit 8048815509402e52fc218ce43a7707412d648b56. Original: Apache 2.0 (c) Digital Asset
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -36,14 +36,14 @@ interface ProposalVoteFormProps {
   readonly voteRequestContractId: string;
   readonly currentSvPartyId: string;
   readonly votes: readonly ProposalVote[];
-  readonly onSubmissionComplete?: (() => void) | undefined;
+  readonly onSubmissionStart?: (() => void) | undefined;
 }
 
 export function ProposalVoteForm({
   voteRequestContractId,
   currentSvPartyId,
   votes,
-  onSubmissionComplete,
+  onSubmissionStart,
 }: ProposalVoteFormProps) {
   const yourVote = votes.find((vote) => vote.sv === currentSvPartyId);
   const initialVote: YourVoteStatus = yourVote?.vote ?? 'no-vote';
@@ -53,12 +53,6 @@ export function ProposalVoteForm({
   const [urlError, setUrlError] = useState<string | undefined>(undefined);
 
   const castVote = useCastVote(voteRequestContractId);
-
-  useEffect(() => {
-    if (castVote.isSuccess || castVote.isError) {
-      onSubmissionComplete?.();
-    }
-  }, [castVote.isSuccess, castVote.isError, onSubmissionComplete]);
 
   const validateUrl = (value: string): boolean => {
     if (value.trim().length === 0 || isValidUrl(value)) {
@@ -73,6 +67,7 @@ export function ProposalVoteForm({
     if (!validateUrl(url)) {
       return;
     }
+    onSubmissionStart?.();
     try {
       await castVote.mutateAsync({
         voteRequestContractId,
@@ -183,7 +178,7 @@ export function ProposalVoteForm({
         </Stack>
 
         <Typography variant="caption" color="text.secondary" textAlign="center">
-          Votes will be signed externally via wallet gateway once Milestone 2 is complete.
+          Your vote is signed externally by your connected wallet before submission.
         </Typography>
       </Stack>
     </Box>
