@@ -23,7 +23,7 @@ describe('PrettyJsonDiff', () => {
       </ThemeProvider>,
     );
 
-    expect(screen.getByText('JSON Diffs')).toBeInTheDocument();
+    expect(screen.getByTestId('json-diff-toggle')).toHaveTextContent('Show JSON');
     expect(screen.getByTestId('config-diffs-display')).toBeInTheDocument();
   });
 });
