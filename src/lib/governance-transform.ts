@@ -26,7 +26,8 @@ import type {
   YourVoteStatus,
 } from '@/types/governance';
 
-const DATE_TIME_FORMAT = 'YYYY-MM-DDTHH:mm:ss[Z]';
+// Matches upstream `dateTimeFormatISO` (apps/common/frontend/utils/src/temporal-fns.ts)
+const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm';
 
 export const DEFAULT_AMULET_NAME = 'Amulet';
 

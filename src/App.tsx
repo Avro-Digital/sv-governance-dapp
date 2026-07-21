@@ -70,7 +70,7 @@ export function App() {
               </Link>
             </Toolbar>
           </AppBar>
-          <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Container maxWidth="xl">
             <Box component="main">
               <Routes>
                 <Route path="/" element={<Navigate to="/governance/proposals" replace />} />
