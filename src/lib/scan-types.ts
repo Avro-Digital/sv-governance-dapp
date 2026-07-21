@@ -122,6 +122,19 @@ export interface ScanListVoteResultsResponse {
   readonly next_page_token?: number | null;
 }
 
+/** Filters for `/v0/admin/sv/voteresults/count` (same semantics as the list request). */
+export interface ScanCountVoteResultsRequest {
+  readonly accepted?: boolean;
+  readonly actionName?: string;
+  readonly requester?: string;
+  readonly effectiveFrom?: string;
+  readonly effectiveTo?: string;
+}
+
+export interface ScanCountVoteResultsResponse {
+  readonly count: number;
+}
+
 export interface GovernanceSnapshot {
   readonly dsoInfo: ScanDsoInfoResponse;
   readonly voteRequests: readonly ScanVoteRequestContract[];

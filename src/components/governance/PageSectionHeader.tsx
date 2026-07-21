@@ -1,6 +1,6 @@
 // Part of the SV Governance dApp — Canton Foundation Development Fund grant #223
 // Adapted from apps/sv/frontend/src/components/beta/PageSectionHeader.tsx
-// at commit 8048815509402e52fc218ce43a7707412d648b56. Original: Apache 2.0 (c) Digital Asset
+// at canton-network/splice main (July 2026 governance redesign). Original: Apache 2.0 (c) Digital Asset
 
 import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
@@ -9,12 +9,14 @@ import Typography from '@mui/material/Typography';
 interface PageSectionHeaderProps {
   readonly title: string;
   readonly badgeCount?: number;
+  readonly badgeColor?: 'warning' | 'neutral';
   readonly 'data-testid': string;
 }
 
 export function PageSectionHeader({
   title,
   badgeCount,
+  badgeColor = 'neutral',
   'data-testid': testId,
 }: PageSectionHeaderProps) {
   return (
@@ -25,8 +27,16 @@ export function PageSectionHeader({
       {badgeCount !== undefined && (
         <Badge
           badgeContent={badgeCount}
-          color="error"
-          sx={{ ml: 2 }}
+          max={Number.MAX_SAFE_INTEGER}
+          color={badgeColor}
+          sx={{
+            ml: 1,
+            '& .MuiBadge-badge': {
+              position: 'static',
+              transform: 'none',
+            },
+            '& .MuiBadge-invisible': { display: 'none' },
+          }}
           id={`${testId}-badge-count`}
           data-testid={`${testId}-badge-count`}
         />

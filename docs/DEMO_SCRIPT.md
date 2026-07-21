@@ -26,7 +26,7 @@ Setup / preflight: [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md). Do not hit Record unt
 
 ## Beat 1 — Connect delegated wallet (~45 s)
 
-1. Focus the standalone dApp (`http://localhost:5173/votes`).
+1. Focus the standalone dApp (`http://localhost:5173/governance/proposals`).
 2. Click **Connect wallet** and approve the CIP-103 session.
 3. Briefly show the toolbar party is `voterParty`, not the SV party.
 4. Optional: show the gateway account/participant mapping proving this party is hosted away from the SV node.
@@ -56,7 +56,7 @@ Setup / preflight: [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md). Do not hit Record unt
 
 ## Beat 3 — Verify creation and select the cast request (~45 s)
 
-1. Focus **this dApp** (`http://localhost:5173/votes`).
+1. Focus **this dApp** (`http://localhost:5173/governance/proposals`).
 2. Open the newly created request under **In Progress**.
 3. Briefly show its action, expiry, and automatic requester Accept vote.
 4. Return to the list and select the pre-seeded request under **Action Needed**.

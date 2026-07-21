@@ -16,6 +16,7 @@ import type {
 } from '@/lib/scan-types';
 import type {
   ActionRequiredItem,
+  ConfigChange,
   ProposalDetailView,
   ProposalDetailsView,
   ProposalListingItem,
@@ -25,7 +26,8 @@ import type {
   YourVoteStatus,
 } from '@/types/governance';
 
-const DATE_TIME_FORMAT = 'YYYY-MM-DDTHH:mm:ss[Z]';
+// Matches upstream `dateTimeFormatISO` (apps/common/frontend/utils/src/temporal-fns.ts)
+const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm';
 
 export const DEFAULT_AMULET_NAME = 'Amulet';
 
@@ -150,23 +152,88 @@ function formatDateTime(value: string | undefined): string {
   return dayjs(value).format(DATE_TIME_FORMAT);
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function formatConfigLeaf(value: unknown): string {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  return JSON.stringify(value);
+}
+
+function humanizeConfigPath(path: string): string {
+  return path
+    .split('.')
+    .map((segment) => segment.replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase())
+    .join(' → ')
+    .replace(/^./, (char) => char.toUpperCase());
+}
+
+/**
+ * Generic leaf-level diff between two JSON configs. The Splice SV UI uses
+ * hand-labelled per-field builders backed by DAML codegen types; without
+ * codegen we derive labels from the JSON path, which shows the same change data.
+ */
+export function buildConfigChanges(
+  before: Record<string, unknown> | undefined,
+  after: Record<string, unknown> | undefined,
+): readonly ConfigChange[] {
+  const changes: ConfigChange[] = [];
+
+  const walk = (base: unknown, next: unknown, path: string): void => {
+    if (isRecord(base) && isRecord(next)) {
+      const keys = new Set([...Object.keys(base), ...Object.keys(next)]);
+      for (const key of keys) {
+        walk(base[key], next[key], path.length > 0 ? `${path}.${key}` : key);
+      }
+      return;
+    }
+
+    const currentValue = formatConfigLeaf(base);
+    const newValue = formatConfigLeaf(next);
+    if (currentValue !== newValue) {
+      changes.push({
+        fieldName: path,
+        label: humanizeConfigPath(path),
+        currentValue,
+        newValue,
+      });
+    }
+  };
+
+  walk(before ?? {}, after ?? {}, '');
+  return changes;
+}
+
+function toConfigRecord(value: unknown): Record<string, unknown> | undefined {
+  return isRecord(value) ? value : undefined;
+}
+
 function buildProposalDetails(
-  contract: ScanVoteRequestContract,
+  payload: ScanVoteRequestContract['payload'],
   dsoInfo: ScanDsoInfoResponse,
   amuletName: string = DEFAULT_AMULET_NAME,
+  isVoteRequest = true,
 ): ProposalDetailsView {
-  const actionTag = getActionTag(contract.payload.action);
-  const actionName = getActionName(contract.payload.action, amuletName);
+  const actionTag = getActionTag(payload.action);
+  const actionName = getActionName(payload.action, amuletName);
 
   const base = {
     actionName,
-    summary: contract.payload.reason.body,
-    url: contract.payload.reason.url,
-    isVoteRequest: true as const,
+    summary: payload.reason.body,
+    url: payload.reason.url,
+    isVoteRequest,
   };
 
+  const dsoAction = payload.action.value.dsoAction;
+  const amuletRulesAction = payload.action.value.amuletRulesAction;
+
   if (actionTag === 'SRARC_UpdateSvRewardWeight') {
-    const dsoAction = contract.payload.action.value.dsoAction;
     const svParty = String(dsoAction?.value.svParty ?? '');
     const newRewardWeight = String(dsoAction?.value.newRewardWeight ?? '');
     const svs = dsoInfo.dso_rules.contract.payload.svs;
@@ -183,38 +250,102 @@ function buildProposalDetails(
   }
 
   if (actionTag === 'SRARC_GrantFeaturedAppRight') {
-    const provider = String(contract.payload.action.value.dsoAction?.value.provider ?? '');
+    const provider = String(dsoAction?.value.provider ?? '');
+    const rawActivityWeight = dsoAction?.value.activityWeight;
+    const activityWeight =
+      rawActivityWeight === null || rawActivityWeight === undefined
+        ? ''
+        : String(rawActivityWeight);
     return {
       ...base,
       action: 'SRARC_GrantFeaturedAppRight',
-      proposal: { provider },
+      proposal: { provider, activityWeight },
     };
   }
 
-  if (actionTag !== undefined) {
+  if (actionTag === 'SRARC_OffboardSv') {
     return {
       ...base,
-      action: actionTag,
+      action: 'SRARC_OffboardSv',
+      proposal: { memberToOffboard: String(dsoAction?.value.sv ?? '') },
+    };
+  }
+
+  if (actionTag === 'SRARC_RevokeFeaturedAppRight') {
+    return {
+      ...base,
+      action: 'SRARC_RevokeFeaturedAppRight',
+      proposal: { rightContractId: String(dsoAction?.value.rightCid ?? '') },
+    };
+  }
+
+  if (actionTag === 'SRARC_CreateUnallocatedUnclaimedActivityRecord') {
+    return {
+      ...base,
+      action: 'SRARC_CreateUnallocatedUnclaimedActivityRecord',
+      proposal: {
+        beneficiary: String(dsoAction?.value.beneficiary ?? ''),
+        amount: String(dsoAction?.value.amount ?? ''),
+        mintBefore: formatDateTime(
+          typeof dsoAction?.value.expiresAt === 'string' ? dsoAction.value.expiresAt : undefined,
+        ),
+      },
+    };
+  }
+
+  if (actionTag === 'SRARC_SetConfig') {
+    const newConfig = toConfigRecord(dsoAction?.value.newConfig) ?? {};
+    const baseConfig = toConfigRecord(dsoAction?.value.baseConfig);
+    const actualConfig = toConfigRecord(dsoInfo.dso_rules.contract.payload.config);
+
+    return {
+      ...base,
+      action: 'SRARC_SetConfig',
+      proposal: {
+        configChanges: buildConfigChanges(baseConfig ?? actualConfig, newConfig),
+        newConfig,
+        ...(baseConfig !== undefined ? { baseConfig } : {}),
+        ...(actualConfig !== undefined ? { actualConfig } : {}),
+      },
+    };
+  }
+
+  if (actionTag === 'CRARC_SetConfig') {
+    const newConfig = toConfigRecord(amuletRulesAction?.value.newConfig) ?? {};
+    const baseConfig = toConfigRecord(amuletRulesAction?.value.baseConfig);
+    const actualConfig = toConfigRecord(
+      dsoInfo.amulet_rules?.contract.payload.configSchedule?.initialValue,
+    );
+
+    return {
+      ...base,
+      action: 'CRARC_SetConfig',
+      proposal: {
+        configChanges: buildConfigChanges(baseConfig ?? actualConfig, newConfig),
+        newConfig,
+        ...(baseConfig !== undefined ? { baseConfig } : {}),
+        ...(actualConfig !== undefined ? { actualConfig } : {}),
+      },
     };
   }
 
   if (import.meta.env.DEV) {
-    console.warn(`Unsupported governance action tag: ${getRawActionTag(contract.payload.action)}`);
+    console.warn(`Unsupported governance action tag: ${getRawActionTag(payload.action)}`);
   }
 
   return {
     ...base,
     action: 'unsupported',
-    rawActionTag: getRawActionTag(contract.payload.action),
+    rawActionTag: getRawActionTag(payload.action),
   };
 }
 
 function toProposalVotes(
-  contract: ScanVoteRequestContract,
+  payload: ScanVoteRequestContract['payload'],
   dsoInfo: ScanDsoInfoResponse,
   svPartyId: string,
 ): readonly ProposalVote[] {
-  const castVotes = parseVoteEntries(contract.payload.votes);
+  const castVotes = parseVoteEntries(payload.votes);
   const allSvPartyIds = dsoInfo.dso_rules.contract.payload.svs.map(([partyId]) => partyId);
 
   return allSvPartyIds.map((sv) => {
@@ -282,7 +413,7 @@ export function toProposalDetailView(
 ): ProposalDetailView {
   return {
     contractId: getVoteRequestContractId(contract),
-    proposalDetails: buildProposalDetails(contract, dsoInfo, amuletName),
+    proposalDetails: buildProposalDetails(contract.payload, dsoInfo, amuletName),
     votingInformation: {
       requester: contract.payload.requester,
       requesterIsYou: contract.payload.requester === svPartyId,
@@ -290,7 +421,33 @@ export function toProposalDetailView(
       voteTakesEffect: formatDateTime(contract.payload.targetEffectiveAt),
       status: 'In Progress',
     },
-    votes: toProposalVotes(contract, dsoInfo, svPartyId),
+    votes: toProposalVotes(contract.payload, dsoInfo, svPartyId),
+  };
+}
+
+/** Detail view for a closed vote result (Vote History rows). */
+export function toClosedProposalDetailView(
+  result: ScanCloseVoteRequestResult,
+  dsoInfo: ScanDsoInfoResponse,
+  svPartyId: string,
+  amuletName: string = DEFAULT_AMULET_NAME,
+): ProposalDetailView {
+  const effectiveAt =
+    result.outcome.tag === 'VRO_Accepted' && typeof result.outcome.value?.effectiveAt === 'string'
+      ? result.outcome.value.effectiveAt
+      : undefined;
+
+  return {
+    contractId: getClosedVoteResultRowId(result),
+    proposalDetails: buildProposalDetails(result.request, dsoInfo, amuletName, false),
+    votingInformation: {
+      requester: result.request.requester,
+      requesterIsYou: result.request.requester === svPartyId,
+      votingThresholdDeadline: formatDateTime(result.request.voteBefore),
+      voteTakesEffect: formatDateTime(effectiveAt ?? result.completedAt),
+      status: getVoteResultStatus(result.outcome),
+    },
+    votes: toProposalVotes(result.request, dsoInfo, svPartyId),
   };
 }
 

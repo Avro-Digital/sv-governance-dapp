@@ -342,7 +342,7 @@ Dry run (not recorded): Connect wallet → create a request with a future effect
 | Step | Where                                   | Action                                                                                       |
 | ---- | --------------------------------------- | -------------------------------------------------------------------------------------------- |
 | 1    | This dApp toolbar                       | **Connect wallet** → party = `voterParty`                                                    |
-| 2    | This dApp `http://localhost:5173/votes` | Create, review, and wallet-sign vote request                                                 |
+| 2    | This dApp `http://localhost:5173/governance/proposals` | Create, review, and wallet-sign vote request                                                 |
 | 3    | This dApp                               | Show the created request under **In Progress** with its automatic requester vote             |
 | 4    | This dApp **Action Needed**             | Open the separately seeded request; Accept/Reject + reason → Confirm → **approve in wallet** |
 | 5    | This dApp + optional Scan               | Show updated ballot / history (`vote.sv` = SV)                                               |

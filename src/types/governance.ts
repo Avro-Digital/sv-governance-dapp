@@ -91,9 +91,33 @@ export interface UpdateSvRewardWeightProposal {
 
 export interface FeatureAppProposal {
   readonly provider: string;
+  readonly activityWeight: string;
 }
 
-/** Proposal fields for the detail view (simplified from Splice `ProposalDetails`). */
+export interface OffboardMemberProposal {
+  readonly memberToOffboard: string;
+}
+
+export interface UnfeatureAppProposal {
+  readonly rightContractId: string;
+}
+
+export interface UnclaimedActivityRecordProposal {
+  readonly beneficiary: string;
+  readonly amount: string;
+  readonly mintBefore: string;
+}
+
+/** Config-change proposal (DsoRules or AmuletRules `SetConfig`). */
+export interface ConfigRulesProposal {
+  readonly configChanges: readonly ConfigChange[];
+  readonly newConfig: Record<string, unknown>;
+  readonly baseConfig?: Record<string, unknown>;
+  /** Current on-ledger config from Scan, for the JSON diff comparison. */
+  readonly actualConfig?: Record<string, unknown>;
+}
+
+/** Proposal fields for the detail view (mirrors Splice `ProposalDetails`). */
 export type ProposalDetailsView = {
   readonly actionName: string;
   readonly summary: string;
@@ -109,13 +133,20 @@ export type ProposalDetailsView = {
       readonly proposal: FeatureAppProposal;
     }
   | {
-      readonly action:
-        | 'SRARC_OffboardSv'
-        | 'SRARC_RevokeFeaturedAppRight'
-        | 'SRARC_SetConfig'
-        | 'CRARC_SetConfig'
-        | 'SRARC_CreateUnallocatedUnclaimedActivityRecord';
-      readonly proposal?: undefined;
+      readonly action: 'SRARC_OffboardSv';
+      readonly proposal: OffboardMemberProposal;
+    }
+  | {
+      readonly action: 'SRARC_RevokeFeaturedAppRight';
+      readonly proposal: UnfeatureAppProposal;
+    }
+  | {
+      readonly action: 'SRARC_CreateUnallocatedUnclaimedActivityRecord';
+      readonly proposal: UnclaimedActivityRecordProposal;
+    }
+  | {
+      readonly action: 'SRARC_SetConfig' | 'CRARC_SetConfig';
+      readonly proposal: ConfigRulesProposal;
     }
   | {
       /** Action not yet mapped in the detail view — see `rawActionTag`. */

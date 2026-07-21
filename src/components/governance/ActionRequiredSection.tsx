@@ -35,6 +35,7 @@ export function ActionRequiredSection({ actionRequiredRequests }: ActionRequired
       <PageSectionHeader
         title="Action Required"
         badgeCount={sortedRequests.length}
+        badgeColor="warning"
         data-testid="action-required"
       />
 
@@ -58,83 +59,100 @@ function ActionCard({ item }: { readonly item: ActionRequiredItem }) {
 
   return (
     <RouterLink
-      to={`/votes/${encodeURIComponent(item.contractId)}`}
+      to={`/governance/proposals/${encodeURIComponent(item.contractId)}`}
       style={{ textDecoration: 'none', color: 'inherit' }}
       data-testid="action-required-card-link"
     >
       <Box
         sx={{
-          bgcolor: 'grey.50',
-          border: 1,
-          borderColor: 'divider',
+          bgcolor: 'colors.neutral.10',
           p: 2,
-          borderRadius: 1,
-          '&:hover': { backgroundColor: 'action.hover' },
+          borderRadius: '4px',
+          '&:hover': { backgroundColor: '#363636' },
         }}
         data-testid="action-required-card"
       >
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          gap={3}
-          alignItems={{ xs: 'flex-start', md: 'center' }}
-        >
-          <ActionCardSegment title="ACTION" content={item.actionName} testId="action-required-action" />
-          <ActionCardSegment
-            title="DESCRIPTION"
-            content={
-              <Typography
-                variant="body2"
-                sx={{
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                }}
-                data-testid="action-required-description-content"
-              >
-                {item.description}
-              </Typography>
-            }
-            testId="action-required-description"
-          />
-          <ActionCardSegment
-            title="CONTRACT ID"
-            content={
-              <CopyableIdentifier
-                value={item.contractId}
-                size="small"
-                data-testid="action-required-contract-id"
-              />
-            }
-            testId="action-required-contract-id-segment"
-          />
-          <ActionCardSegment
-            title="CREATED AT"
-            content={item.createdAt}
-            testId="action-required-created-at"
-          />
-          <ActionCardSegment
-            title="REMAINING TIME"
-            content={remainingTime}
-            testId="action-required-voting-closes"
-          />
-          <ActionCardSegment
-            title="REQUESTER"
-            content={
-              <MemberIdentifier
-                partyId={item.requester}
-                isYou={item.isYou === true}
-                size="small"
-                data-testid="action-required-requester-identifier"
-              />
-            }
-            testId="action-required-requester"
-          />
-          <Stack direction="row" alignItems="center" gap={1} sx={{ ml: { md: 'auto' } }}>
-            <Typography fontWeight={500} color="text.secondary">
+        <Stack direction="row" gap={5} alignItems="flex-start">
+          <Box sx={{ flexShrink: 0 }}>
+            <ActionCardSegment title="ACTION" content={item.actionName} testId="action-required-action" />
+          </Box>
+          <Box sx={{ flexShrink: 1, minWidth: 0, maxWidth: 200 }}>
+            <ActionCardSegment
+              title="DESCRIPTION"
+              content={
+                <Typography
+                  variant="body1"
+                  color="text.light"
+                  fontWeight="medium"
+                  fontSize={14}
+                  lineHeight={1.4}
+                  sx={{
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                  data-testid="action-required-description-content"
+                >
+                  {item.description}
+                </Typography>
+              }
+              testId="action-required-description"
+            />
+          </Box>
+          <Box sx={{ flexShrink: 1, minWidth: 0, maxWidth: 300 }}>
+            <ActionCardSegment
+              title="CONTRACT ID"
+              content={
+                <CopyableIdentifier
+                  value={item.contractId}
+                  size="small"
+                  data-testid="action-required-contract-id"
+                />
+              }
+              testId="action-required-contract-id-segment"
+            />
+          </Box>
+          <Box sx={{ flexShrink: 0 }}>
+            <ActionCardSegment
+              title="CREATED AT"
+              content={item.createdAt}
+              testId="action-required-created-at"
+            />
+          </Box>
+          <Box sx={{ flexShrink: 0 }}>
+            <ActionCardSegment
+              title="REMAINING TIME"
+              content={remainingTime}
+              testId="action-required-voting-closes"
+            />
+          </Box>
+          <Box sx={{ flexShrink: 1, minWidth: 0, maxWidth: 300 }}>
+            <ActionCardSegment
+              title="REQUESTER"
+              content={
+                <MemberIdentifier
+                  partyId={item.requester}
+                  isYou={item.isYou === true}
+                  size="small"
+                  data-testid="action-required-requester-identifier"
+                />
+              }
+              testId="action-required-requester"
+            />
+          </Box>
+          <Stack
+            direction="row"
+            alignItems="center"
+            gap={1}
+            sx={{ ml: 'auto', flexShrink: 0, alignSelf: 'center' }}
+            data-testid="action-required-view-details"
+          >
+            <Typography fontWeight={500} color="text.light">
               View Details
             </Typography>
-            <East fontSize="small" color="action" />
+            <East fontSize="small" color="secondary" />
           </Stack>
         </Stack>
       </Box>
@@ -152,12 +170,27 @@ function ActionCardSegment({
   readonly testId: string;
 }) {
   return (
-    <Stack data-testid={testId} gap={0.5}>
-      <Typography fontSize={12} fontWeight={700} color="text.secondary" data-testid={`${testId}-title`}>
+    <Stack height="100%" justifyContent="space-between" data-testid={testId}>
+      <Typography
+        fontSize={12}
+        lineHeight={2}
+        fontWeight={700}
+        variant="subtitle2"
+        color="text.light"
+        gutterBottom
+        data-testid={`${testId}-title`}
+      >
         {title}
       </Typography>
       {typeof content === 'string' ? (
-        <Typography variant="body2" data-testid={`${testId}-content`}>
+        <Typography
+          variant="body1"
+          color="text.light"
+          fontWeight="medium"
+          fontSize={14}
+          lineHeight={2}
+          data-testid={`${testId}-content`}
+        >
           {content}
         </Typography>
       ) : (

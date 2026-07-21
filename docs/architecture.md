@@ -109,9 +109,9 @@ In Splice, `apps/sv/frontend/src/components/votes/VoteRequest.tsx` renders **two
 1. **`CreateVoteRequest`** — operator proposes a governance action (`SvAdminClient.createVoteRequest`, OIDC)
 2. **`SvListVoteRequests`** — enumerate open requests, open detail modal, cast/edit vote
 
-This dApp’s `/votes` route implements both surfaces. Proposal creation preserves the original seven action types and common expiry/effectivity fields, but replaces the SV Admin write with wallet-signed `VoteDelegation_RequestVote`. Review and casting continue through Scan reads and `VoteDelegation_CastVote`.
+Following the July 2026 upstream redesign, these surfaces are full pages instead of a tabbed list with modals: `/governance/proposals` (list), `/governance/proposals/create` (proposal creation), and `/governance/proposals/:contractId` (details and voting). Proposal creation preserves the original seven action types and common expiry/effectivity fields, but replaces the SV Admin write with wallet-signed `VoteDelegation_RequestVote`. Review and casting continue through Scan reads and `VoteDelegation_CastVote`. Legacy `/votes` URLs redirect.
 
-**Executed / Rejected tabs:** Splice groups `VRO_Expired` outcomes under the **Rejected** tab (same as here). Operators should expect expired proposals in that tab even though the label reads “Rejected” — not a data bug.
+**Expired proposals:** Splice groups `VRO_Expired` outcomes with rejected results in Vote History (same as here) — not a data bug.
 
 **Fonts:** Inter is bundled via `@fontsource/inter` (weights 400/500/700) — no third-party CDN at runtime.
 
