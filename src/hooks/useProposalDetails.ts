@@ -5,7 +5,6 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { useGovernanceSnapshot } from '@/hooks/useGovernanceSnapshot';
-import { useIdentityStore } from '@/stores/identity';
 import { toClosedProposalDetailView, toProposalDetailView } from '@/lib/governance-transform';
 import { fetchVoteRequestResults } from '@/lib/mock-vote-results';
 import {
@@ -14,6 +13,7 @@ import {
   resolveVoteRequest,
 } from '@/lib/scan-client';
 import type { GovernanceSnapshot } from '@/lib/scan-types';
+import { useIdentityStore } from '@/stores/identity';
 import type { ProposalDetailView } from '@/types/governance';
 
 const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_VOTES !== 'false';

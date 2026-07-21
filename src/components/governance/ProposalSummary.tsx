@@ -12,8 +12,8 @@ import {
   scrollContainerSx,
   scrollableIdentifierFieldSx,
 } from '@/components/governance/identifierStyles';
-import { THRESHOLD_DEADLINE_SUBTITLE } from '@/utils/governance-constants';
 import type { ConfigChange } from '@/types/governance';
+import { THRESHOLD_DEADLINE_SUBTITLE } from '@/utils/governance-constants';
 
 interface BaseProposalSummaryProps {
   readonly actionName: string;
