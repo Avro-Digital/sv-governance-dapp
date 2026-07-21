@@ -91,9 +91,33 @@ export interface UpdateSvRewardWeightProposal {
 
 export interface FeatureAppProposal {
   readonly provider: string;
+  readonly activityWeight: string;
 }
 
-/** Proposal fields for the detail view (simplified from Splice `ProposalDetails`). */
+export interface OffboardMemberProposal {
+  readonly memberToOffboard: string;
+}
+
+export interface UnfeatureAppProposal {
+  readonly rightContractId: string;
+}
+
+export interface UnclaimedActivityRecordProposal {
+  readonly beneficiary: string;
+  readonly amount: string;
+  readonly mintBefore: string;
+}
+
+/** Config-change proposal (DsoRules or AmuletRules `SetConfig`). */
+export interface ConfigRulesProposal {
+  readonly configChanges: readonly ConfigChange[];
+  readonly newConfig: Record<string, unknown>;
+  readonly baseConfig?: Record<string, unknown>;
+  /** Current on-ledger config from Scan, for the JSON diff comparison. */
+  readonly actualConfig?: Record<string, unknown>;
+}
+
+/** Proposal fields for the detail view (mirrors Splice `ProposalDetails`). */
 export type ProposalDetailsView = {
   readonly actionName: string;
   readonly summary: string;
@@ -109,8 +133,20 @@ export type ProposalDetailsView = {
       readonly proposal: FeatureAppProposal;
     }
   | {
-      readonly action: 'SRARC_OffboardSv' | 'SRARC_RevokeFeaturedAppRight' | 'SRARC_SetConfig' | 'CRARC_SetConfig' | 'SRARC_CreateUnallocatedUnclaimedActivityRecord';
-      readonly proposal?: undefined;
+      readonly action: 'SRARC_OffboardSv';
+      readonly proposal: OffboardMemberProposal;
+    }
+  | {
+      readonly action: 'SRARC_RevokeFeaturedAppRight';
+      readonly proposal: UnfeatureAppProposal;
+    }
+  | {
+      readonly action: 'SRARC_CreateUnallocatedUnclaimedActivityRecord';
+      readonly proposal: UnclaimedActivityRecordProposal;
+    }
+  | {
+      readonly action: 'SRARC_SetConfig' | 'CRARC_SetConfig';
+      readonly proposal: ConfigRulesProposal;
     }
   | {
       /** Action not yet mapped in the detail view — see `rawActionTag`. */
@@ -139,12 +175,64 @@ export interface ActionRequiredItem {
   readonly isYou?: boolean;
 }
 
-/** Arguments for casting a vote — mirrors Splice `ProposalVoteForm` / `SvAdminClient.castVote`. */
+/**
+ * Contract disclosed explicitly with an interactive submission so the voter's
+ * participant can validate contracts it does not host (DsoRules, VoteRequest).
+ */
+export interface DisclosedContractInput {
+  readonly contractId: string;
+  readonly createdEventBlob: string;
+  readonly templateId?: string;
+}
+
+/** Arguments for casting a vote via the VoteDelegation CIP-103 path. */
 export interface CastVoteArgs {
   readonly voteRequestContractId: string;
   readonly accepted: boolean;
   readonly reasonUrl: string;
   readonly reasonDescription: string;
+  /** `VoteDelegation` contract id — required for prepareExecute. */
+  readonly voteDelegationCid: string;
+  /** Active `DsoRules` contract id. */
+  readonly dsoRulesCid: string;
+  /** Delegating SV party recorded on `Vote.sv`. */
+  readonly svPartyId: string;
+  /** Wallet party that controls `VoteDelegation_CastVote`. */
+  readonly voterPartyId: string;
+  /** Contracts not hosted on the voter's participant (DsoRules, VoteRequest). */
+  readonly disclosedContracts?: readonly DisclosedContractInput[];
+}
+
+/** Raw DAML action payload accepted by `DsoRules_RequestVote`. */
+export interface GovernanceAction {
+  readonly tag: 'ARC_DsoRules' | 'ARC_AmuletRules';
+  readonly value: {
+    readonly dsoAction?: {
+      readonly tag: SupportedActionTag;
+      readonly value: Record<string, unknown>;
+    };
+    readonly amuletRulesAction?: {
+      readonly tag: SupportedActionTag;
+      readonly value: Record<string, unknown>;
+    };
+  };
+}
+
+/** Arguments for creating a vote request through `VoteDelegation_RequestVote`. */
+export interface RequestVoteArgs {
+  readonly action: GovernanceAction;
+  readonly reasonUrl: string;
+  readonly reasonDescription: string;
+  /** Relative timeout in microseconds. */
+  readonly voteRequestTimeoutMicroseconds: string;
+  /** ISO timestamp, or undefined to become effective at threshold. */
+  readonly targetEffectiveAt?: string;
+  readonly voteDelegationCid: string;
+  readonly dsoRulesCid: string;
+  readonly svPartyId: string;
+  readonly voterPartyId: string;
+  /** Contracts not hosted on the voter's participant (DsoRules). */
+  readonly disclosedContracts?: readonly DisclosedContractInput[];
 }
 
 /** Prepared vote transaction awaiting external signature (CIP-103 / dApp SDK path). */
@@ -153,6 +241,11 @@ export interface PreparedVoteTransaction {
   readonly accepted: boolean;
   readonly reasonUrl: string;
   readonly reasonDescription: string;
+  readonly voteDelegationCid: string;
+  readonly dsoRulesCid: string;
+  readonly svPartyId: string;
+  readonly voterPartyId: string;
+  readonly disclosedContracts?: readonly DisclosedContractInput[];
   readonly transactionHash: string;
   readonly preparedAt: string;
 }
@@ -165,4 +258,6 @@ export interface SignedVoteTransaction {
   readonly preparedTransactionHash: string;
   readonly signature: string;
   readonly signedAt: string;
+  /** Carries prepareExecute params from preparation through submit. */
+  readonly prepared: PreparedVoteTransaction;
 }

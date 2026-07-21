@@ -2,6 +2,8 @@
 
 <!-- Brief description of changes -->
 
+**Base branch:** open PRs against **`develop`** (default integration branch). Use `develop` → `main` only for stable promotion.
+
 ## Linear
 
 <!-- Required: Closes AVR-XXXX or Related to AVR-XXXX -->

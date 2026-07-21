@@ -10,24 +10,26 @@ Standalone application for Canton Super Validators to cast governance votes via 
 
 ## Status
 
-**Work in progress** — funded by the [Canton Foundation Development Fund](https://github.com/canton-foundation/canton-dev-fund) under [grant proposal #223](https://github.com/canton-foundation/canton-dev-fund/pull/223). Current focus: [Milestone 2 — External Signing Proof of Concept](https://github.com/canton-foundation/canton-dev-fund/issues/287) — Scan reads and Vote Requests UI parity are on `main`; wallet connect and on-ledger cast vote are next.
+**Work in progress** — funded by the [Canton Foundation Development Fund](https://github.com/canton-foundation/canton-dev-fund) under [grant proposal #223](https://github.com/canton-foundation/canton-dev-fund/pull/223) (amended via [PR #414](https://github.com/canton-foundation/canton-dev-fund/pull/414); [approved proposal text](https://github.com/canton-foundation/canton-dev-fund/blob/main/proposals/2026-04-Avro-SV_Governance_dApp.md)). Current focus: [Milestone 2 — External Signing Proof of Concept](https://github.com/canton-foundation/canton-dev-fund/issues/287) — Scan reads and Vote Requests UI parity are on `develop`; wallet connect and **`VoteDelegation`-backed** cast are next.
 
 Project tracking: [Linear — SV Governance dApp Implementation](https://linear.app/avro-digital/project/sv-governance-dapp-implementation-46f8d4022e3b) · M2 epic: [AVR-2471](https://linear.app/avro-digital/issue/AVR-2471)
 
 ## About
 
-This dApp lets Super Validators (SVs) review pending governance proposals and cast votes without relying on the full SV operator application. It is designed for wallet-gateway-backed external signing, enabling SV operators to approve governance actions through their preferred Canton wallet rather than in-app credentials alone.
+This dApp lets Super Validators (SVs) review pending governance proposals and cast votes without relying on the full SV operator application. It is designed for wallet-gateway-backed external signing, enabling an operator-administered **voter party** (confirming participant ≠ SV node) to approve governance actions through their preferred Canton wallet rather than in-app operator credentials alone.
 
-The UI will be extracted and adapted from the governance views in the [Splice SV operator app](https://github.com/canton-network/splice) (`apps/sv/frontend/`), keeping visual and interaction parity while running as a standalone frontend.
+The UI is extracted and adapted from the governance views in the [Splice SV operator app](https://github.com/canton-network/splice) (`apps/sv/frontend/`), keeping visual and interaction parity while running as a standalone frontend.
 
 ## Grant context
 
 | Link | Description |
 | --- | --- |
 | [PR #223](https://github.com/canton-foundation/canton-dev-fund/pull/223) | Grant proposal — SV Governance dApp with external signing |
+| [PR #414](https://github.com/canton-foundation/canton-dev-fund/pull/414) / [proposal text](https://github.com/canton-foundation/canton-dev-fund/blob/main/proposals/2026-04-Avro-SV_Governance_dApp.md) | Approved scope amendment — separate governance-voting identity; field-classification language in grant text |
+| [`splice-sv-voting-dapp` #12](https://github.com/canton-network/splice-sv-voting-dapp/pull/12) | M1 implementation — `VoteDelegation` (no Daml-level gov/non-gov split; UI-level who-can-vote) |
 | [Issue #287](https://github.com/canton-foundation/canton-dev-fund/issues/287) | Milestone 2 — External Signing Proof of Concept |
 
-Milestone 2 will demonstrate an end-to-end externally signed non-operational governance vote recorded on-chain, integrated with `@canton-network/dapp-sdk` and a wallet-gateway signing path.
+Milestone 2 will demonstrate an end-to-end externally signed vote by a **delegated voter party** recorded on-chain (confirming participant ≠ SV node), integrated with `@canton-network/dapp-sdk` and a wallet-gateway signing path. On-chain infrastructure lands in Milestone 1 ([`splice-sv-voting-dapp`](https://github.com/canton-network/splice-sv-voting-dapp)); see [`docs/architecture.md`](./docs/architecture.md) for grant text vs implementation.
 
 ## Attribution
 
@@ -48,17 +50,20 @@ pnpm typecheck  # TypeScript strict check
 
 Copy `.env.example` to `.env` and set ledger connection values before connecting to a participant.
 
-Contributing: [`CONTRIBUTING.md`](./CONTRIBUTING.md) · SDLC: [`docs/sdlc.md`](./docs/sdlc.md) (PR-only `main`, Linear-linked branches)
+Contributing: [`CONTRIBUTING.md`](./CONTRIBUTING.md) · SDLC: [`docs/sdlc.md`](./docs/sdlc.md) (PR-only `develop`/`main`, Linear-linked branches)
 
 ## Roadmap
 
-Grant milestones under [proposal #223](https://github.com/canton-foundation/canton-dev-fund/pull/223):
+Grant milestones under [proposal #223](https://github.com/canton-foundation/canton-dev-fund/pull/223) (see [amendment #414](https://github.com/canton-foundation/canton-dev-fund/pull/414)):
 
-- [x] **Milestone 1** — Repository scaffold and project setup
-- [ ] **Milestone 2** — External signing proof of concept (in progress)
-- [ ] **Milestone 3** — Splice UI extraction and integration
-- [ ] **Milestone 4** — End-to-end demo with wallet gateway
-- [ ] **Milestone 5** — Partner-compatible CIP-103 integration notes
+| Milestone | Focus | Repo / status |
+| --- | --- | --- |
+| **M1** | Separate governance-voting identity from node ops (grant: field-classification language; **implementation:** `VoteDelegation` + UI-level who-can-vote) | [`splice-sv-voting-dapp` #12](https://github.com/canton-network/splice-sv-voting-dapp/pull/12) — in review |
+| **M2** | External signing PoC — this dApp + wallet gateway + delegated cast | **This repo** — UI/read path done; signing stack next |
+| **M3** | Deployment packaging, operator voter-party/key binding, staging validation | Planned |
+| **M4** | UX hardening, audit/diff views, rollout docs | Planned |
+
+Linear: [SV Governance dApp Implementation](https://linear.app/avro-digital/project/sv-governance-dapp-implementation-46f8d4022e3b).
 
 ## License
 

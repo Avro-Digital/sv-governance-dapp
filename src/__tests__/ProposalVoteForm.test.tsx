@@ -24,7 +24,7 @@ function renderForm() {
 }
 
 describe('ProposalVoteForm', () => {
-  it('shows external signing message when submit fails', async () => {
+  it('prompts to connect a wallet when cast context is incomplete', async () => {
     const user = userEvent.setup();
     renderForm();
 
@@ -32,7 +32,7 @@ describe('ProposalVoteForm', () => {
     await user.click(screen.getByTestId('your-vote-accept'));
 
     expect(await screen.findByTestId('vote-submission-error')).toHaveTextContent(
-      /External signing is not yet implemented/i,
+      /Connect a wallet so the VoteDelegation voterParty can sign the cast/i,
     );
   });
 });

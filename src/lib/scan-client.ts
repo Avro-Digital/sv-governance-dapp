@@ -2,6 +2,8 @@
 
 import type {
   GovernanceSnapshot,
+  ScanCountVoteResultsRequest,
+  ScanCountVoteResultsResponse,
   ScanDsoInfoResponse,
   ScanListVoteRequestsResponse,
   ScanListVoteResultsRequest,
@@ -162,4 +164,30 @@ export async function listVoteRequestResults(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),
   });
+}
+
+/**
+ * Counts closed vote results (`scan.yaml`: POST `/v0/admin/sv/voteresults/count`).
+ * Returns `null` when the Scan instance predates the endpoint (July 2026 redesign)
+ * so callers can fall back to counting loaded pages.
+ */
+export async function countVoteRequestResults(
+  request: ScanCountVoteResultsRequest,
+): Promise<number | null> {
+  try {
+    const response = await scanFetch<ScanCountVoteResultsResponse>(
+      '/v0/admin/sv/voteresults/count',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(request),
+      },
+    );
+    return response.count;
+  } catch (error) {
+    if (error instanceof ScanApiError && [404, 405, 501].includes(error.status)) {
+      return null;
+    }
+    throw error;
+  }
 }

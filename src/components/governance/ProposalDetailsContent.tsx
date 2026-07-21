@@ -1,6 +1,6 @@
 // Part of the SV Governance dApp — Canton Foundation Development Fund grant #223
 // Adapted from apps/sv/frontend/src/components/governance/ProposalDetailsContent.tsx
-// at commit 8048815509402e52fc218ce43a7707412d648b56. Original: Apache 2.0 (c) Digital Asset
+// at canton-network/splice main (July 2026 governance redesign). Original: Apache 2.0 (c) Digital Asset
 
 import {
   forwardRef,
@@ -10,7 +10,6 @@ import {
   type PropsWithChildren,
   type SyntheticEvent,
 } from 'react';
-
 
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
 import Edit from '@mui/icons-material/Edit';
@@ -29,10 +28,13 @@ import { ConfigValuesChanges } from '@/components/governance/ConfigValuesChanges
 import { CopyableIdentifier } from '@/components/governance/CopyableIdentifier';
 import { CopyableUrl } from '@/components/governance/CopyableUrl';
 import { DetailItem } from '@/components/governance/DetailItem';
+import { JsonDiffAccordion } from '@/components/governance/JsonDiffAccordion';
 import { MemberIdentifier } from '@/components/governance/MemberIdentifier';
+import { PrettyJsonDiff } from '@/components/governance/PrettyJsonDiff';
 import { ProposalVoteForm } from '@/components/governance/ProposalVoteForm';
 import { VoteStats } from '@/components/governance/VoteStats';
 import type {
+  ConfigRulesProposal,
   ProposalDetailsView,
   ProposalVote,
   ProposalVotingInformation,
@@ -102,13 +104,13 @@ export function ProposalDetailsContent({
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
-        <Typography variant="h5" fontWeight={700} data-testid="proposal-details-title">
+      <Stack direction="row" alignItems="center" justifyContent="space-between" mb="14px">
+        <Typography variant="h4" fontSize={20} fontWeight={700} data-testid="proposal-details-title">
           Proposal Details
         </Typography>
         <Button
           component={RouterLink}
-          to="/votes"
+          to="/governance/proposals"
           size="small"
           color="secondary"
           startIcon={<ChevronLeft fontSize="small" />}
@@ -117,7 +119,7 @@ export function ProposalDetailsContent({
         </Button>
       </Stack>
 
-      <Stack sx={{ bgcolor: 'grey.50', borderRadius: 2, p: { xs: 2, md: 4 } }} gap={4}>
+      <Stack sx={{ bgcolor: 'colors.neutral.10', p: { xs: 2, md: 6 } }} alignItems="center" gap={8}>
         <VoteSection title="Proposal Details" testId="proposal-details-proposal-details">
           <DetailItem
             label="Action"
@@ -138,19 +140,90 @@ export function ProposalDetailsContent({
             labelId="proposal-details-contractid-label"
           />
 
-          {proposalDetails.action === 'SRARC_UpdateSvRewardWeight' && (
-            <>
+          {proposalDetails.action === 'SRARC_OffboardSv' && (
+            <Box
+              id="proposal-details-offboard-member-section"
+              data-testid="proposal-details-offboard-member-section"
+              sx={{ display: 'contents' }}
+            >
               <DetailItem
                 label="Member"
                 value={
                   <MemberIdentifier
-                    partyId={proposalDetails.proposal.svToUpdate}
+                    partyId={proposalDetails.proposal.memberToOffboard}
                     isYou={false}
                     size="large"
                     data-testid="proposal-details-member-party-id"
                   />
                 }
               />
+            </Box>
+          )}
+
+          {proposalDetails.action === 'SRARC_GrantFeaturedAppRight' && (
+            <Box
+              id="proposal-details-feature-app-section"
+              data-testid="proposal-details-feature-app-section"
+              sx={{ display: 'contents' }}
+            >
+              <DetailItem
+                label="Provider Party ID"
+                value={
+                  <CopyableIdentifier
+                    value={proposalDetails.proposal.provider}
+                    size="large"
+                    data-testid="proposal-details-feature-app-value"
+                  />
+                }
+                labelId="proposal-details-feature-app-label"
+              />
+              <DetailItem
+                label="Activity Weight"
+                value={proposalDetails.proposal.activityWeight}
+                labelId="proposal-details-feature-app-activity-weight-label"
+                valueId="proposal-details-feature-app-activity-weight-value"
+              />
+            </Box>
+          )}
+
+          {proposalDetails.action === 'SRARC_RevokeFeaturedAppRight' && (
+            <Box
+              id="proposal-details-unfeature-app-section"
+              data-testid="proposal-details-unfeature-app-section"
+              sx={{ display: 'contents' }}
+            >
+              <DetailItem
+                label="Featured Application Contract ID"
+                value={
+                  <CopyableIdentifier
+                    value={proposalDetails.proposal.rightContractId}
+                    size="large"
+                    data-testid="proposal-details-unfeature-app-value"
+                  />
+                }
+                labelId="proposal-details-unfeature-app-label"
+              />
+            </Box>
+          )}
+
+          {proposalDetails.action === 'SRARC_UpdateSvRewardWeight' && (
+            <>
+              <Box
+                id="proposal-details-update-sv-reward-weight-section"
+                data-testid="proposal-details-update-sv-reward-weight-section"
+              >
+                <DetailItem
+                  label="Member"
+                  value={
+                    <MemberIdentifier
+                      partyId={proposalDetails.proposal.svToUpdate}
+                      isYou={false}
+                      size="large"
+                      data-testid="proposal-details-member-party-id"
+                    />
+                  }
+                />
+              </Box>
               <DetailItem
                 label="Proposed Changes"
                 value={
@@ -169,18 +242,41 @@ export function ProposalDetailsContent({
             </>
           )}
 
-          {proposalDetails.action === 'SRARC_GrantFeaturedAppRight' && (
-            <DetailItem
-              label="Provider Party ID"
-              value={
-                <CopyableIdentifier
-                  value={proposalDetails.proposal.provider}
-                  size="large"
-                  data-testid="proposal-details-feature-app-value"
-                />
-              }
-              labelId="proposal-details-feature-app-label"
-            />
+          {proposalDetails.action === 'SRARC_CreateUnallocatedUnclaimedActivityRecord' && (
+            <Box
+              id="proposal-details-unallocated-unclaimed-activity-record-section"
+              data-testid="proposal-details-unallocated-unclaimed-activity-record-section"
+              sx={{ display: 'contents' }}
+            >
+              <DetailItem
+                label="Beneficiary"
+                value={
+                  <CopyableIdentifier
+                    value={proposalDetails.proposal.beneficiary}
+                    size="large"
+                    data-testid="proposal-details-beneficiary-value"
+                  />
+                }
+                labelId="proposal-details-beneficiary-label"
+              />
+              <DetailItem
+                label="Amount"
+                value={proposalDetails.proposal.amount}
+                labelId="proposal-details-amount-label"
+                valueId="proposal-details-amount-value"
+              />
+              <DetailItem
+                label="Must Mint Before"
+                value={proposalDetails.proposal.mintBefore}
+                labelId="proposal-details-mint-before-label"
+                valueId="proposal-details-mint-before-value"
+              />
+            </Box>
+          )}
+
+          {(proposalDetails.action === 'SRARC_SetConfig' ||
+            proposalDetails.action === 'CRARC_SetConfig') && (
+            <ConfigChangesSection proposal={proposalDetails.proposal} />
           )}
 
           <DetailItem
@@ -258,30 +354,41 @@ export function ProposalDetailsContent({
             onChange={(_event: SyntheticEvent, newValue: VoteTabFilter) => {
               setVoteTabValue(newValue);
             }}
+            aria-label="vote tabs"
             data-testid="votes-tabs"
+            sx={{
+              boxShadow: 'inset 0 -2px 0 0 rgba(255, 255, 255, 0.12)',
+              '& .MuiTabs-indicator': {
+                backgroundColor: 'colors.tertiary',
+                height: '2px',
+              },
+            }}
           >
-            <Tab label={`All (${votes.length})`} value="all" data-testid="all-votes-tab" />
+            <Tab label={`All (${String(votes.length)})`} value="all" data-testid="all-votes-tab" />
             <Tab
-              label={`Accepted (${acceptedVotes.length})`}
+              label={`Accepted (${String(acceptedVotes.length)})`}
               value="accepted"
               data-testid="accepted-votes-tab"
             />
             <Tab
-              label={`Rejected (${rejectedVotes.length})`}
+              label={`Rejected (${String(rejectedVotes.length)})`}
               value="rejected"
               data-testid="rejected-votes-tab"
             />
             <Tab
-              label={`${isClosed ? 'Did not Vote' : 'Awaiting Response'} (${awaitingVotes.length})`}
+              label={`${isClosed ? 'Did not Vote' : 'Awaiting Response'} (${String(awaitingVotes.length)})`}
               value="no-vote"
               data-testid="no-vote-votes-tab"
             />
           </Tabs>
 
-          <Stack gap={2} data-testid="proposal-details-votes-list" sx={{ mt: 2 }}>
+          <Box
+            sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
+            data-testid="proposal-details-votes-list"
+          >
             {filteredVotes.map((vote, index) => (
               <VoteItem
-                key={`${vote.sv}-${index}`}
+                key={`${vote.sv}-${String(index)}`}
                 vote={vote}
                 isClosed={isClosed}
                 onEdit={
@@ -294,11 +401,13 @@ export function ProposalDetailsContent({
               />
             ))}
             {filteredVotes.length === 0 && (
-              <Typography variant="body2" color="text.secondary" textAlign="center" py={2}>
-                No votes found for this category.
-              </Typography>
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <Typography variant="body2" color="text.secondary">
+                  No votes found for this category.
+                </Typography>
+              </Box>
             )}
-          </Stack>
+          </Box>
         </VoteSection>
 
         {showVoteForm && (
@@ -314,7 +423,7 @@ export function ProposalDetailsContent({
               voteRequestContractId={contractId}
               currentSvPartyId={currentSvPartyId}
               votes={votes}
-              onSubmissionComplete={() => {
+              onSubmissionStart={() => {
                 setVoteSubmitted(true);
               }}
             />
@@ -322,6 +431,30 @@ export function ProposalDetailsContent({
         )}
       </Stack>
     </Box>
+  );
+}
+
+function ConfigChangesSection({ proposal }: { readonly proposal: ConfigRulesProposal }) {
+  const actualConfig = proposal.actualConfig ?? proposal.baseConfig;
+
+  return (
+    <>
+      <DetailItem
+        label="Proposed Changes"
+        value={<ConfigValuesChanges changes={proposal.configChanges} />}
+      />
+      <JsonDiffAccordion variant="review">
+        {actualConfig !== undefined ? (
+          <PrettyJsonDiff
+            changes={{
+              newConfig: proposal.newConfig,
+              actualConfig,
+              ...(proposal.baseConfig !== undefined ? { baseConfig: proposal.baseConfig } : {}),
+            }}
+          />
+        ) : null}
+      </JsonDiffAccordion>
+    </>
   );
 }
 
@@ -338,7 +471,7 @@ const VoteSection = forwardRef<HTMLDivElement, VoteSectionProps>(function VoteSe
 ) {
   return (
     <Box sx={{ width: '100%', maxWidth: 800, mx: 'auto' }} data-testid={testId} ref={ref}>
-      <Typography component="h2" fontSize={18} fontWeight={700} mb={2}>
+      <Typography component="h2" fontSize={18} fontWeight={700} mb={3}>
         {title}
       </Typography>
       <Box
@@ -347,12 +480,12 @@ const VoteSection = forwardRef<HTMLDivElement, VoteSectionProps>(function VoteSe
             border: 2,
             borderColor: 'divider',
             borderRadius: 2,
-            py: 4,
-            px: { xs: 2, md: 6 },
+            py: 5,
+            px: { xs: 2, md: 12 },
           }),
         }}
       >
-        <Stack gap={2} alignItems={centered === true ? 'center' : undefined}>
+        <Stack gap={3} alignItems={centered === true ? 'center' : undefined}>
           {children}
         </Stack>
       </Box>
@@ -372,28 +505,28 @@ function VoteItem({
   return (
     <>
       <Box
-        sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}
+        sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}
         data-testid="proposal-details-vote"
       >
         <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-          <MemberIdentifier
-            partyId={vote.sv}
-            isYou={vote.isYou === true}
-            size="large"
-            data-testid="proposal-details-voter-party-id"
-          />
+          <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+            <MemberIdentifier
+              partyId={vote.sv}
+              isYou={vote.isYou === true}
+              size="large"
+              data-testid="proposal-details-voter-party-id"
+            />
+          </Box>
           {vote.vote !== 'no-vote' && vote.reason.body.length > 0 && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            <Typography fontSize={16} color="text.secondary">
               {vote.reason.body}
             </Typography>
           )}
           {vote.vote !== 'no-vote' && vote.reason.url.length > 0 && (
-            <Box sx={{ mt: 0.5 }}>
-              <CopyableUrl url={vote.reason.url} size="small" data-testid="proposal-details-vote-url" />
-            </Box>
+            <CopyableUrl url={vote.reason.url} size="small" data-testid="proposal-details-vote-url" />
           )}
         </Box>
-        <Stack direction="row" alignItems="center" gap={2}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <VoteStats
             vote={vote.vote}
             noVoteMessage={isClosed ? 'No Vote' : 'Awaiting Response'}
@@ -402,17 +535,17 @@ function VoteItem({
           {onEdit !== undefined && (
             <Button
               color="secondary"
-              size="small"
               startIcon={<Edit fontSize="small" />}
               onClick={onEdit}
               data-testid="your-vote-edit-button"
+              sx={{ fontSize: 16 }}
             >
               Edit
             </Button>
           )}
-        </Stack>
+        </Box>
       </Box>
-      <Divider />
+      <Divider sx={{ borderBottomWidth: 2 }} />
     </>
   );
 }

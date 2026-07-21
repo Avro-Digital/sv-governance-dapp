@@ -44,6 +44,8 @@ export interface ScanVoteRequestContract {
   readonly contract_id: string;
   readonly payload: ScanVoteRequestPayload;
   readonly created_at: string;
+  /** Base64 blob for explicit disclosure in interactive submissions. */
+  readonly created_event_blob?: string;
 }
 
 export interface ScanListVoteRequestsResponse {
@@ -67,9 +69,25 @@ export interface ScanDsoInfoResponse {
   readonly voting_threshold: number;
   readonly dso_rules: {
     readonly contract: {
+      /** Present on live Scan responses; optional in mock fixtures. */
+      readonly contract_id?: string;
+      readonly template_id?: string;
+      /** Base64 blob for explicit disclosure in interactive submissions. */
+      readonly created_event_blob?: string;
       readonly payload: {
         readonly svs: ReadonlyArray<readonly [string, ScanSvInfo]>;
         readonly config?: Record<string, unknown>;
+      };
+    };
+  };
+  readonly amulet_rules?: {
+    readonly contract: {
+      readonly contract_id?: string;
+      readonly payload: {
+        readonly configSchedule?: {
+          readonly initialValue: Record<string, unknown>;
+          readonly futureValues?: readonly unknown[];
+        };
       };
     };
   };
@@ -102,6 +120,19 @@ export interface ScanListVoteResultsRequest {
 export interface ScanListVoteResultsResponse {
   readonly dso_rules_vote_results: readonly ScanCloseVoteRequestResult[];
   readonly next_page_token?: number | null;
+}
+
+/** Filters for `/v0/admin/sv/voteresults/count` (same semantics as the list request). */
+export interface ScanCountVoteResultsRequest {
+  readonly accepted?: boolean;
+  readonly actionName?: string;
+  readonly requester?: string;
+  readonly effectiveFrom?: string;
+  readonly effectiveTo?: string;
+}
+
+export interface ScanCountVoteResultsResponse {
+  readonly count: number;
 }
 
 export interface GovernanceSnapshot {

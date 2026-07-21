@@ -27,17 +27,33 @@ export interface SvAdminClient {
   ): Promise<void>;
 }
 
-/** Maps Splice cast-vote parameters to our shared args type. */
-export function toCastVoteArgs(
+/** Maps Splice cast-vote form fields; VoteDelegation context is resolved at submit time. */
+export function toCastVoteFormInput(
   voteRequestContractId: string,
   accepted: boolean,
   reasonUrl: string,
   reasonDescription: string,
-): CastVoteArgs {
+): Pick<
+  CastVoteArgs,
+  'voteRequestContractId' | 'accepted' | 'reasonUrl' | 'reasonDescription'
+> {
   return {
     voteRequestContractId,
     accepted,
     reasonUrl,
     reasonDescription,
   };
+}
+
+/** @deprecated Use {@link toCastVoteFormInput}; full {@link CastVoteArgs} require VoteDelegation context. */
+export function toCastVoteArgs(
+  voteRequestContractId: string,
+  accepted: boolean,
+  reasonUrl: string,
+  reasonDescription: string,
+): Pick<
+  CastVoteArgs,
+  'voteRequestContractId' | 'accepted' | 'reasonUrl' | 'reasonDescription'
+> {
+  return toCastVoteFormInput(voteRequestContractId, accepted, reasonUrl, reasonDescription);
 }

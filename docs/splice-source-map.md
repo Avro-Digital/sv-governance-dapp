@@ -33,11 +33,17 @@ M2.3 extracted the **governance dashboard** table (`ProposalListingSection` from
 
 The M2.4 Scan data layer (`scan-client`, `governance-transform`, hooks) feeds the lifted `ListVoteRequests` + modal stack on `/votes`.
 
-## Legacy (pre-overhaul) paths
+## July 2026 redesign (current)
 
-Still present under `components/votes/` — prefer `components/governance/` for new extractions:
+Upstream replaced the tabbed `/votes` surface with full-page routes. This dApp follows suit
+(AVR-2471); the `components/votes/` tree was removed:
 
-- `components/votes/SvListVoteRequests.tsx`
-- `components/votes/VoteForm.tsx`
+| Reference UX | Splice source | This repo |
+| --- | --- | --- |
+| Governance list page | `apps/sv/frontend/src/routes/governance.tsx` | `src/routes/Governance.tsx` on `/governance/proposals` |
+| Proposal details page | `apps/sv/frontend/src/routes/voteRequestDetails.tsx` | `src/routes/ProposalDetails.tsx` on `/governance/proposals/:contractId` |
+| Create-proposal flow | `apps/sv/frontend/src/routes/createProposal.tsx` + `components/forms/` | `src/routes/CreateProposal.tsx`, `src/components/forms/` |
+
+Legacy `/votes` and `/votes/:id` URLs redirect to the new routes.
 
 Log each extraction in [`splice-extraction-log.md`](./splice-extraction-log.md).
