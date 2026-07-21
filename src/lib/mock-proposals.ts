@@ -88,6 +88,7 @@ export const MOCK_PROPOSAL_DETAILS: Readonly<Record<string, ProposalDetailView>>
       action: 'SRARC_GrantFeaturedAppRight',
       proposal: {
         provider: 'provider::1220def',
+        activityWeight: '1.0',
       },
     },
     votingInformation: {
